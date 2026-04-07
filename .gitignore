@@ -1,0 +1,57 @@
+# ============================================================
+# ASP.NET Core / Visual Studio
+# ============================================================
+
+bin/
+obj/
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.rsuser
+.vscode/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Published output
+publish/
+**/Properties/launchSettings.json
+
+# Entity Framework migrations (optional — remove this line if you want migrations tracked)
+# Migrations/
+
+# ============================================================
+# Angular / Node.js
+# ============================================================
+
+node_modules/
+dist/
+.angular/
+.cache/
+
+# Environment files — IMPORTANT: never commit these
+**/environment.prod.ts
+# If you store secrets in a local environment file
+.env
+.env.*
+
+# Package lock (keep package-lock.json or yarn.lock, your choice — but be consistent)
+# yarn.lock
+
+# ============================================================
+# General
+# ============================================================
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# IDE
+.idea/
+*.swp
