@@ -17,7 +17,6 @@ artifacts/
 
 # Published output
 publish/
-**/Properties/launchSettings.json
 
 # Entity Framework migrations (optional — remove this line if you want migrations tracked)
 # Migrations/
@@ -31,8 +30,6 @@ dist/
 .angular/
 .cache/
 
-# Environment files — IMPORTANT: never commit these
-**/environment.prod.ts
 # If you store secrets in a local environment file
 .env
 .env.*

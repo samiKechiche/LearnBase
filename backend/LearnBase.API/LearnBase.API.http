@@ -1,0 +1,6 @@
+@LearnBase.API_HostAddress = http://localhost:5077
+
+GET {{LearnBase.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
