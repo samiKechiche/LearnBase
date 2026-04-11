@@ -45,6 +45,11 @@ dist/
 .DS_Store
 Thumbs.db
 
+# Database files (SQLite) - everyone has their own local copy
+*.db
+*.db-shm
+*.db-wal
+
 # Logs
 *.log
 npm-debug.log*
@@ -52,3 +57,4 @@ npm-debug.log*
 # IDE
 .idea/
 *.swp
+
