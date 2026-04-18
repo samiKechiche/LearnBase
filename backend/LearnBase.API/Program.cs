@@ -1,28 +1,33 @@
-using LearnBase.API.Data;
+﻿using LearnBase.API.Data;
 using LearnBase.API.Services;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// ════════════════════════════════════════════════════════════
+// REGISTER ALL SERVICES (Exercise + Tag + PracticeSet)
+// ════════════════════════════════════════════════════════════
+
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
-        // This prevents circular reference errors when fetching related data 
-        // (e.g., User -> Exercises -> User creates infinite loop without this)
+        // Prevents circular reference errors when fetching related data
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     });
 
-// Learn about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+// Service Registrations (ALL THREE)
+builder.Services.AddScoped<ExerciseService>();      // From Exercise Management feature
+builder.Services.AddScoped<TagService>();           // From Tag Management feature
+builder.Services.AddScoped<PracticeSetService>();   // From Practice Set Management feature
+
+// Swagger/OpenAPI configuration
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Database Configuration - Using SQLite (local file-based database)
+// Database Configuration - SQLite
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-builder.Services.AddScoped<PracticeSetService>();
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=LearnBase.db");
 
 var app = builder.Build();
 
