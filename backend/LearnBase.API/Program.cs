@@ -16,7 +16,6 @@ builder.Services.AddControllers()
 builder.Services.AddScoped<ExerciseService>();
 builder.Services.AddScoped<TagService>();
 builder.Services.AddScoped<PracticeSetService>();
-builder.Services.AddScoped<PracticeSessionService>();  // ← MAKE SURE THIS LINE EXISTS!
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
