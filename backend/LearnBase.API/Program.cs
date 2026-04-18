@@ -1,6 +1,7 @@
-using System.Text.Json.Serialization;
 using LearnBase.API.Data;
+using LearnBase.API.Services;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +21,8 @@ builder.Services.AddSwaggerGen();
 // Database Configuration - Using SQLite (local file-based database)
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<PracticeSetService>();
 
 var app = builder.Build();
 
