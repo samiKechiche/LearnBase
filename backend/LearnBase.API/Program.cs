@@ -1,4 +1,5 @@
 ﻿using LearnBase.API.Data;
+using LearnBase.API.Models;
 using LearnBase.API.Services;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
@@ -11,9 +12,11 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     });
 
+// ALL FOUR SERVICES REGISTERED HERE
 builder.Services.AddScoped<ExerciseService>();
 builder.Services.AddScoped<TagService>();
 builder.Services.AddScoped<PracticeSetService>();
+builder.Services.AddScoped<PracticeSessionService>();  // ← MAKE SURE THIS LINE EXISTS!
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
