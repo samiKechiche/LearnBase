@@ -17,6 +17,7 @@ builder.Services.AddScoped<ExerciseService>();
 builder.Services.AddScoped<TagService>();
 builder.Services.AddScoped<PracticeSetService>();
 builder.Services.AddScoped<PracticeSessionService>();
+builder.Services.AddScoped<PracticeSessionStatsService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

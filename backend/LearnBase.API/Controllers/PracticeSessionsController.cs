@@ -6,19 +6,21 @@ using LearnBase.API.Services;
 namespace LearnBase.API.Controllers;
 
 /// <summary>
-/// Controller for managing practice sessions.
-/// Users can start sessions, submit answers, skip exercises,
-/// end sessions, view history, and delete sessions.
+/// Controller for managing practice sessions and viewing statistics.
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
 public class PracticeSessionsController : ControllerBase
 {
     private readonly PracticeSessionService _sessionService;
+    private readonly PracticeSessionStatsService _statsService;
 
-    public PracticeSessionsController(PracticeSessionService sessionService)
+    public PracticeSessionsController(
+        PracticeSessionService sessionService,
+        PracticeSessionStatsService statsService)
     {
         _sessionService = sessionService;
+        _statsService = statsService;
     }
 
     // ================================================================
@@ -108,6 +110,21 @@ public class PracticeSessionsController : ControllerBase
         if (!result.Success)
             return NotFound(result);
 
+        return Ok(result);
+    }
+
+    // ================================================================
+    // STATISTICS
+    // ================================================================
+
+    /// <summary>
+    /// GET: api/practicesessions/stats
+    /// Gets overall practice statistics for the current user.
+    /// </summary>
+    [HttpGet("stats")]
+    public async Task<ActionResult<ApiResponseDto<PracticeStatsDto>>> GetStats()
+    {
+        var result = await _statsService.GetStatsAsync(UserId);
         return Ok(result);
     }
 
