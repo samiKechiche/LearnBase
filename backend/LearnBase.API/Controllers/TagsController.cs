@@ -16,6 +16,8 @@ public class TagsController : ControllerBase
         _tagService = tagService;
     }
 
+    private Guid UserId => Guid.Parse("00000000-0000-0000-0000-000000000001");
+
     /// <summary>
     /// POST: api/tags
     /// Creates a new tag
@@ -24,8 +26,7 @@ public class TagsController : ControllerBase
     public async Task<ActionResult<ApiResponseDto<TagResponseDto>>> CreateTag(
         [FromBody] CreateTagDto dto)
     {
-        var placeholderUserId = GetPlaceholderUserId();
-        var result = await _tagService.CreateAsync(dto, placeholderUserId);
+        var result = await _tagService.CreateAsync(dto, UserId);
 
         if (!result.Success)
             return BadRequest(result);
@@ -44,8 +45,7 @@ public class TagsController : ControllerBase
         [FromQuery] string? sortBy = null,
         [FromQuery] bool ascending = true)
     {
-        var placeholderUserId = GetPlaceholderUserId();
-        var result = await _tagService.GetAllAsync(placeholderUserId, search, sortBy, ascending);
+        var result = await _tagService.GetAllAsync(UserId, search, sortBy, ascending);
 
         return Ok(result);
     }
@@ -57,8 +57,7 @@ public class TagsController : ControllerBase
     [HttpGet("{tagId:guid}")]
     public async Task<ActionResult<ApiResponseDto<TagResponseDto>>> GetTagById(Guid tagId)
     {
-        var placeholderUserId = GetPlaceholderUserId();
-        var result = await _tagService.GetByIdAsync(tagId, placeholderUserId);
+        var result = await _tagService.GetByIdAsync(tagId, UserId);
 
         if (!result.Success)
             return NotFound(result);
@@ -75,8 +74,7 @@ public class TagsController : ControllerBase
         Guid tagId,
         [FromBody] UpdateTagDto dto)
     {
-        var placeholderUserId = GetPlaceholderUserId();
-        var result = await _tagService.UpdateAsync(tagId, dto, placeholderUserId);
+        var result = await _tagService.UpdateAsync(tagId, dto, UserId);
 
         if (!result.Success)
             return BadRequest(result);
@@ -91,17 +89,11 @@ public class TagsController : ControllerBase
     [HttpDelete("{tagId:guid}")]
     public async Task<ActionResult<ApiResponseDto<bool>>> DeleteTag(Guid tagId)
     {
-        var placeholderUserId = GetPlaceholderUserId();
-        var result = await _tagService.DeleteAsync(tagId, placeholderUserId);
+        var result = await _tagService.DeleteAsync(tagId, UserId);
 
         if (!result.Success)
             return NotFound(result);
 
         return Ok(result);
-    }
-
-    private Guid GetPlaceholderUserId()
-    {
-        return Guid.Parse("00000000-0000-0000-0000-000000000001");
     }
 }

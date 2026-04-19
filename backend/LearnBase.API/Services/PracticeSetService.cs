@@ -365,7 +365,6 @@ public class PracticeSetService
         }
 
         // Create the practice set
-        // ✅ FIXED: Was incorrectly using userExerciseIds.Count (int) instead of userId (Guid)
         var practiceSet = new PracticeSet
         {
             PracticeSetId = Guid.NewGuid(),
@@ -476,8 +475,12 @@ public class PracticeSetService
 
         await _context.SaveChangesAsync();
 
-        // ✅ FIXED: Proper null check before calling MapToResponseDto
-        var reloadedSet = await _context.PracticeSets.FindAsync(practiceSetId);
+        // FIXED: Use Include to load related data for the response
+        var reloadedSet = await _context.PracticeSets
+            .Include(ps => ps.Lesson)
+            .Include(ps => ps.PracticeSetExercises)
+                .ThenInclude(pse => pse.Exercise)
+            .FirstOrDefaultAsync(ps => ps.PracticeSetId == practiceSetId);
 
         if (reloadedSet == null)
         {
@@ -503,7 +506,6 @@ public class PracticeSetService
             CreationType = set.CreationType,
             LessonId = set.LessonId,
             LessonTitle = set.Lesson?.Title,
-            // ✅ These are safe - ?? operator handles potential null
             ExerciseCount = set.PracticeSetExercises?.Count ?? 0,
             SessionCount = set.PracticeSessions?.Count ?? 0,
             CreatedAt = set.CreatedAt,

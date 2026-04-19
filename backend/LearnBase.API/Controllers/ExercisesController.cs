@@ -19,6 +19,8 @@ public class ExercisesController : ControllerBase
         _tagService = tagService;
     }
 
+    private Guid UserId => Guid.Parse("00000000-0000-0000-0000-000000000001");
+
     /// <summary>
     /// POST: api/exercises
     /// Creates a new exercise
@@ -27,11 +29,7 @@ public class ExercisesController : ControllerBase
     public async Task<ActionResult<ApiResponseDto<ExerciseResponseDto>>> CreateExercise(
         [FromBody] CreateExerciseDto dto)
     {
-        // TODO: After Saifedine implements auth, get UserId from JWT token
-        // For now, using a placeholder (will update when auth is ready)
-        var placeholderUserId = Guid.Parse("00000000-0000-0000-0000-000000000001");
-
-        var result = await _exerciseService.CreateAsync(dto, placeholderUserId);
+        var result = await _exerciseService.CreateAsync(dto, UserId);
 
         if (!result.Success)
         {
@@ -52,10 +50,7 @@ public class ExercisesController : ControllerBase
         [FromQuery] string? sortBy = null,
         [FromQuery] bool ascending = false)
     {
-        // TODO: Replace with actual UserId from JWT
-        var placeholderUserId = Guid.Parse("00000000-0000-0000-0000-000000000001");
-
-        var result = await _exerciseService.GetAllAsync(placeholderUserId, search, sortBy, ascending);
+        var result = await _exerciseService.GetAllAsync(UserId, search, sortBy, ascending);
 
         return Ok(result);
     }
@@ -68,10 +63,7 @@ public class ExercisesController : ControllerBase
     public async Task<ActionResult<ApiResponseDto<ExerciseResponseDto>>> GetExerciseById(
         Guid exerciseId)
     {
-        // TODO: Replace with actual UserId from JWT
-        var placeholderUserId = Guid.Parse("00000000-0000-0000-0000-000000000001");
-
-        var result = await _exerciseService.GetByIdAsync(exerciseId, placeholderUserId);
+        var result = await _exerciseService.GetByIdAsync(exerciseId, UserId);
 
         if (!result.Success)
         {
@@ -90,10 +82,7 @@ public class ExercisesController : ControllerBase
         Guid exerciseId,
         [FromBody] UpdateExerciseDto dto)
     {
-        // TODO: Replace with actual UserId from JWT
-        var placeholderUserId = Guid.Parse("00000000-0000-0000-0000-000000000001");
-
-        var result = await _exerciseService.UpdateAsync(exerciseId, dto, placeholderUserId);
+        var result = await _exerciseService.UpdateAsync(exerciseId, dto, UserId);
 
         if (!result.Success)
         {
@@ -110,10 +99,7 @@ public class ExercisesController : ControllerBase
     [HttpDelete("{exerciseId:guid}")]
     public async Task<ActionResult<ApiResponseDto<bool>>> DeleteExercise(Guid exerciseId)
     {
-        // TODO: Replace with actual UserId from JWT
-        var placeholderUserId = Guid.Parse("00000000-0000-0000-0000-000000000001");
-
-        var result = await _exerciseService.DeleteAsync(exerciseId, placeholderUserId);
+        var result = await _exerciseService.DeleteAsync(exerciseId, UserId);
 
         if (!result.Success)
         {
@@ -123,11 +109,8 @@ public class ExercisesController : ControllerBase
         return Ok(result);
     }
 
-
     // ═══════════════════════════════════════════════════════════════
     // TAG MANAGEMENT ENDPOINTS FOR EXERCISES
-    // These allow managing which tags are linked to a specific exercise
-    // Part of the Tag Management feature (feature/tag-management branch)
     // ═══════════════════════════════════════════════════════════════
 
     /// <summary>
@@ -137,8 +120,7 @@ public class ExercisesController : ControllerBase
     [HttpGet("{exerciseId:guid}/tags")]
     public async Task<ActionResult<ApiResponseDto<List<TagResponseDto>>>> GetExerciseTags(Guid exerciseId)
     {
-        var placeholderUserId = GetPlaceholderUserId();
-        var result = await _tagService.GetTagsForExerciseAsync(exerciseId, placeholderUserId);
+        var result = await _tagService.GetTagsForExerciseAsync(exerciseId, UserId);
 
         if (!result.Success)
             return NotFound(result);
@@ -155,8 +137,7 @@ public class ExercisesController : ControllerBase
         Guid exerciseId,
         Guid tagId)
     {
-        var placeholderUserId = GetPlaceholderUserId();
-        var result = await _tagService.AddTagToExerciseAsync(exerciseId, tagId, placeholderUserId);
+        var result = await _tagService.AddTagToExerciseAsync(exerciseId, tagId, UserId);
 
         if (!result.Success)
             return BadRequest(result);
@@ -173,16 +154,11 @@ public class ExercisesController : ControllerBase
         Guid exerciseId,
         Guid tagId)
     {
-        var placeholderUserId = GetPlaceholderUserId();
-        var result = await _tagService.RemoveTagFromExerciseAsync(exerciseId, tagId, placeholderUserId);
+        var result = await _tagService.RemoveTagFromExerciseAsync(exerciseId, tagId, UserId);
 
         if (!result.Success)
             return BadRequest(result);
 
         return Ok(result);
-    }
-    private Guid GetPlaceholderUserId()
-    {
-        return Guid.Parse("00000000-0000-0000-0000-000000000001");
     }
 }
