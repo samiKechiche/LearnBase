@@ -1,6 +1,7 @@
 ﻿using LearnBase.API.DTOs.Auth;
 using LearnBase.API.DTOs.Shared;
 using LearnBase.API.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LearnBase.API.Controllers
@@ -34,10 +35,6 @@ namespace LearnBase.API.Controllers
         {
             var user = _authService.CreateUserFromRegisterDto(registerDto);
 
-            //if (!ModelState.IsValid)
-            //{
-            //    return BadRequest(ModelState);
-            //}
             ModelState.ClearValidationState(nameof(user));
             if (!TryValidateModel(user, nameof(user)))
             {
@@ -45,6 +42,19 @@ namespace LearnBase.API.Controllers
             }
 
             var result = await _authService.SaveUserToDatabase(user);
+
+            if (!result.Success)
+            {
+                return BadRequest(result);
+            }
+
+            return Ok(result);
+        }
+
+        [HttpPut("/changePassword")]
+        public async Task<ActionResult<ApiResponseDto<AuthResponseDto>>> changePassword([FromBody] ChangePasswordDto changePasswordDto)
+        {
+            var result = await _authService.ChangePasswordAsync(changePasswordDto);
 
             if (!result.Success)
             {

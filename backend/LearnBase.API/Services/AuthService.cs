@@ -63,6 +63,46 @@ namespace LearnBase.API.Services
                 );
         }
 
+        public async Task<ApiResponseDto<AuthResponseDto>> ChangePasswordAsync(ChangePasswordDto changePassword)
+        {
+            var userId = new Guid(_jwtService.GetUserIdFromToken(changePassword.Token));
+
+            if (userId == null)
+            {
+                return ApiResponseDto<AuthResponseDto>.ErrorResponse("No User ID");
+            }
+
+            var user = await _context.Users
+                .FirstOrDefaultAsync(e => e.UserId.Equals(userId));
+
+            if (user == null)
+            {
+                return ApiResponseDto<AuthResponseDto>.ErrorResponse("User with Id not found");
+            }
+
+            if (!PasswordHasherService.VerifyPassword(changePassword.Current, user.PasswordHash))
+            {
+                return ApiResponseDto<AuthResponseDto>.ErrorResponse("Invalid Password");
+            }
+
+            if (PasswordHasherService.VerifyPassword(changePassword.New, user.PasswordHash))
+            {
+                return ApiResponseDto<AuthResponseDto>.ErrorResponse("The new password can't be the same as the current one.");
+            }
+
+            var newPasswordHash = PasswordHasherService.HashPassword(changePassword.New);
+
+            user.PasswordHash = newPasswordHash;
+            user.PasswordUpdatedAt = DateTime.UtcNow;
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+
+            return ApiResponseDto<AuthResponseDto>.SuccessResponse
+                (
+                    MapToAuthResponseDto(user),
+                    "Password Updated Successfully."
+                );
+        }
 
         private AuthResponseDto MapToAuthResponseDto(User user, string token)
         {
@@ -70,12 +110,16 @@ namespace LearnBase.API.Services
             {
                 Token = token,
                 UserId = user.UserId,
-                //Username = user.Username,
-                //ProfilePicture = user.ProfilePicture,
-                //Email = user.Email,
-                //PasswordHash = user.PasswordHash,
-                //PasswordUpdatedAt = user.PasswordUpdatedAt,
-                //CreatedAt = user.CreatedAt,
+            };
+
+            return dto;
+        }
+
+        private AuthResponseDto MapToAuthResponseDto(User user)
+        {
+            var dto = new AuthResponseDto
+            {
+                UserId = user.UserId,
             };
 
             return dto;
