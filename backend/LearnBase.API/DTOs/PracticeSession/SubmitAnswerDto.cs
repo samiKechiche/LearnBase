@@ -11,7 +11,7 @@ public class SubmitAnswerDto
     [Required]
     public Guid ExerciseId { get; set; }
 
-    /// <summary>The user's answer text (for MCQ: the selected OptionId)</summary>
+    /// <summary>The user's answer text (for MCQ: the selected option's text content)</summary>
     [Required]
     public string UserAnswer { get; set; } = string.Empty;
 }
