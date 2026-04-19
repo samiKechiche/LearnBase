@@ -18,6 +18,9 @@ builder.Services.AddScoped<TagService>();
 builder.Services.AddScoped<PracticeSetService>();
 builder.Services.AddScoped<PracticeSessionService>();
 builder.Services.AddScoped<PracticeSessionStatsService>();
+builder.Services.AddScoped<JwtService>();
+builder.Services.AddScoped<PasswordHasherService>();
+builder.Services.AddScoped<AuthService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
