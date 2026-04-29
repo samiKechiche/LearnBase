@@ -25,6 +25,7 @@ builder.Services.AddScoped<PracticeSessionStatsService>();
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<PasswordHasherService>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<LessonService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
