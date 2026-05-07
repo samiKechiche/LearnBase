@@ -51,6 +51,7 @@ namespace LearnBase.API.Controllers
             return Ok(result);
         }
 
+        [Authorize]
         [HttpPut("/changePassword")]
         public async Task<ActionResult<ApiResponseDto<AuthResponseDto>>> changePassword([FromBody] ChangePasswordDto changePasswordDto)
         {
