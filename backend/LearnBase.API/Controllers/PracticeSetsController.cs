@@ -1,12 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using LearnBase.API.DTOs.PracticeSet;
 using LearnBase.API.DTOs.Shared;
 using LearnBase.API.Services;
+using System.Security.Claims;
 
 namespace LearnBase.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class PracticeSetsController : ControllerBase
 {
     private readonly PracticeSetService _practiceSetService;
@@ -182,7 +185,21 @@ public class PracticeSetsController : ControllerBase
 
     #region Private Helpers
 
-    private Guid UserId => Guid.Parse("00000000-0000-0000-0000-000000000001");
+    private Guid UserId
+    {
+        get
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                           ?? User.FindFirstValue("sub");
+
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+            {
+                throw new InvalidOperationException("User ID claim not found or invalid in the current request.");
+            }
+
+            return userId;
+        }
+    }
 
     private ActionResult ResultToActionResult<T>(ApiResponseDto<T> result)
     {
