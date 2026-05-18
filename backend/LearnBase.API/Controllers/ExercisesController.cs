@@ -2,12 +2,15 @@
 using LearnBase.API.DTOs.Shared;
 using LearnBase.API.DTOs.Tag;
 using LearnBase.API.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace LearnBase.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]  // ADD THIS - require authentication for ALL exercise endpoints
 public class ExercisesController : ControllerBase
 {
     private readonly ExerciseService _exerciseService;
@@ -19,31 +22,32 @@ public class ExercisesController : ControllerBase
         _tagService = tagService;
     }
 
-    private Guid UserId => Guid.Parse("00000000-0000-0000-0000-000000000001");
+    // EXTRACT UserId from JWT claims (same pattern as other controllers)
+    private Guid UserId
+    {
+        get
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                           ?? User.FindFirstValue("sub");
 
-    /// <summary>
-    /// POST: api/exercises
-    /// Creates a new exercise
-    /// </summary>
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+            {
+                throw new InvalidOperationException("User ID claim not found or invalid.");
+            }
+
+            return userId;
+        }
+    }
+
     [HttpPost]
     public async Task<ActionResult<ApiResponseDto<ExerciseResponseDto>>> CreateExercise(
         [FromBody] CreateExerciseDto dto)
     {
         var result = await _exerciseService.CreateAsync(dto, UserId);
-
-        if (!result.Success)
-        {
-            return BadRequest(result);
-        }
-
+        if (!result.Success) return BadRequest(result);
         return Ok(result);
     }
 
-    /// <summary>
-    /// GET: api/exercises
-    /// Gets all exercises for the current user
-    /// Optional query params: ?search=term&sortBy=date&ascending=false
-    /// </summary>
     [HttpGet]
     public async Task<ActionResult<ApiResponseDto<List<ExerciseResponseDto>>>> GetExercises(
         [FromQuery] string? search = null,
@@ -51,114 +55,58 @@ public class ExercisesController : ControllerBase
         [FromQuery] bool ascending = false)
     {
         var result = await _exerciseService.GetAllAsync(UserId, search, sortBy, ascending);
-
         return Ok(result);
     }
 
-    /// <summary>
-    /// GET: api/exercises/{id}
-    /// Gets a specific exercise by ID
-    /// </summary>
     [HttpGet("{exerciseId:guid}")]
-    public async Task<ActionResult<ApiResponseDto<ExerciseResponseDto>>> GetExerciseById(
-        Guid exerciseId)
+    public async Task<ActionResult<ApiResponseDto<ExerciseResponseDto>>> GetExerciseById(Guid exerciseId)
     {
         var result = await _exerciseService.GetByIdAsync(exerciseId, UserId);
-
-        if (!result.Success)
-        {
-            return NotFound(result);
-        }
-
+        if (!result.Success) return NotFound(result);
         return Ok(result);
     }
 
-    /// <summary>
-    /// PUT: api/exercises/{id}
-    /// Updates an existing exercise
-    /// </summary>
     [HttpPut("{exerciseId:guid}")]
     public async Task<ActionResult<ApiResponseDto<ExerciseResponseDto>>> UpdateExercise(
-        Guid exerciseId,
-        [FromBody] UpdateExerciseDto dto)
+        Guid exerciseId, [FromBody] UpdateExerciseDto dto)
     {
         var result = await _exerciseService.UpdateAsync(exerciseId, dto, UserId);
-
-        if (!result.Success)
-        {
-            return BadRequest(result);
-        }
-
+        if (!result.Success) return BadRequest(result);
         return Ok(result);
     }
 
-    /// <summary>
-    /// DELETE: api/exercises/{id}
-    /// Deletes an exercise
-    /// </summary>
     [HttpDelete("{exerciseId:guid}")]
     public async Task<ActionResult<ApiResponseDto<bool>>> DeleteExercise(Guid exerciseId)
     {
         var result = await _exerciseService.DeleteAsync(exerciseId, UserId);
-
-        if (!result.Success)
-        {
-            return NotFound(result);
-        }
-
+        if (!result.Success) return NotFound(result);
         return Ok(result);
     }
 
-    // ═══════════════════════════════════════════════════════════════
-    // TAG MANAGEMENT ENDPOINTS FOR EXERCISES
-    // ═══════════════════════════════════════════════════════════════
-
-    /// <summary>
-    /// GET: api/exercises/{exerciseId}/tags
-    /// Gets all tags associated with a specific exercise
-    /// </summary>
+    // Tag management endpoints
     [HttpGet("{exerciseId:guid}/tags")]
     public async Task<ActionResult<ApiResponseDto<List<TagResponseDto>>>> GetExerciseTags(Guid exerciseId)
     {
         var result = await _tagService.GetTagsForExerciseAsync(exerciseId, UserId);
-
-        if (!result.Success)
-            return NotFound(result);
-
+        if (!result.Success) return NotFound(result);
         return Ok(result);
     }
 
-    /// <summary>
-    /// POST: api/exercises/{exerciseId}/tags/{tagId}
-    /// Adds a tag to an exercise
-    /// </summary>
     [HttpPost("{exerciseId:guid}/tags/{tagId:guid}")]
     public async Task<ActionResult<ApiResponseDto<TagResponseDto>>> AddTagToExercise(
-        Guid exerciseId,
-        Guid tagId)
+        Guid exerciseId, Guid tagId)
     {
         var result = await _tagService.AddTagToExerciseAsync(exerciseId, tagId, UserId);
-
-        if (!result.Success)
-            return BadRequest(result);
-
+        if (!result.Success) return BadRequest(result);
         return Ok(result);
     }
 
-    /// <summary>
-    /// DELETE: api/exercises/{exerciseId}/tags/{tagId}
-    /// Removes a tag from an exercise
-    /// </summary>
     [HttpDelete("{exerciseId:guid}/tags/{tagId:guid}")]
     public async Task<ActionResult<ApiResponseDto<bool>>> RemoveTagFromExercise(
-        Guid exerciseId,
-        Guid tagId)
+        Guid exerciseId, Guid tagId)
     {
         var result = await _tagService.RemoveTagFromExerciseAsync(exerciseId, tagId, UserId);
-
-        if (!result.Success)
-            return BadRequest(result);
-
+        if (!result.Success) return BadRequest(result);
         return Ok(result);
     }
 }

@@ -106,7 +106,16 @@ builder.Services.AddSwaggerGen(c => {
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=LearnBase.db"));
 
+builder.Services.AddCors();
+
 var app = builder.Build();
+
+// CORS - Allow Angular frontend to call the API
+app.UseCors(policy => policy
+    .WithOrigins("http://localhost:4200")  // Angular dev server
+    .AllowAnyMethod()
+    .AllowAnyHeader()
+    .AllowCredentials());
 
 app.UseRouting();
 
