@@ -13,14 +13,20 @@ import { MatListModule } from '@angular/material/list';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 
-import { EXERCISE_TYPE_LABELS, Exercise, ExerciseType } from '../../../exercises/models/exercise.model';
+import { apiErrorMessage } from '../../../../core/http/api-error';
+import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import {
+  EXERCISE_TYPE_LABELS,
+  Exercise,
+  ExerciseType,
+} from '../../../exercises/models/exercise.model';
 import { Tag } from '../../../exercises/models/tag.model';
 import { ExerciseService } from '../../../exercises/services/exercise.service';
 import { TagService } from '../../../exercises/services/tag.service';
-import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import {
   CreationType,
   ExerciseTypeSummary,
@@ -47,6 +53,7 @@ import { PracticeSetService } from '../../services/practice-set.service';
     MatProgressSpinnerModule,
     MatSelectModule,
     MatSnackBarModule,
+    MatTooltipModule,
   ],
   templateUrl: './practice-sets.component.html',
   styleUrl: './practice-sets.component.css',
@@ -157,6 +164,13 @@ export class PracticeSetsComponent implements OnInit {
   }
 
   deleteSet(practiceSet: PracticeSet): void {
+    if (!this.canDeleteSet(practiceSet)) {
+      this.snackBar.open('Delete this set after removing its session history.', 'Close', {
+        duration: 3500,
+      });
+      return;
+    }
+
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '430px',
       data: {
@@ -212,10 +226,6 @@ export class PracticeSetsComponent implements OnInit {
       .subscribe({
         next: () => {
           this.snackBar.open('Exercise removed', 'Close', { duration: 2200 });
-          this.practiceSetService.getPracticeSet(this.selectedSet!.practiceSetId).subscribe({
-            next: (practiceSet) => (this.selectedSet = practiceSet),
-            error: (error) => this.showError(error),
-          });
           this.loadPageData();
         },
         error: (error) => this.showError(error),
@@ -252,8 +262,14 @@ export class PracticeSetsComponent implements OnInit {
   }
 
   availableExercises(): Exercise[] {
-    const usedIds = new Set(this.selectedSet?.exercises?.map((exercise) => exercise.exerciseId) ?? []);
+    const usedIds = new Set(
+      this.selectedSet?.exercises?.map((exercise) => exercise.exerciseId) ?? [],
+    );
     return this.exercises.filter((exercise) => !usedIds.has(exercise.exerciseId));
+  }
+
+  canDeleteSet(practiceSet: PracticeSet): boolean {
+    return practiceSet.sessionCount === 0;
   }
 
   exerciseTypeLabel(type: ExerciseType | ExerciseTypeSummary): string {
@@ -263,8 +279,7 @@ export class PracticeSetsComponent implements OnInit {
   private showError(error: unknown): void {
     this.loading = false;
     this.saving = false;
-    const message =
-      error instanceof Error ? error.message : 'Something went wrong while loading practice sets.';
+    const message = apiErrorMessage(error, 'Something went wrong while loading practice sets.');
     this.snackBar.open(message, 'Close', { duration: 4500 });
   }
 }

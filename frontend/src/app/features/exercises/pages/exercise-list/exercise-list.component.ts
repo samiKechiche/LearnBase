@@ -14,11 +14,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterLink } from '@angular/router';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 
-import {
-  EXERCISE_TYPE_LABELS,
-  Exercise,
-  ExerciseType,
-} from '../../models/exercise.model';
+import { apiErrorMessage } from '../../../../core/http/api-error';
+import { EXERCISE_TYPE_LABELS, Exercise, ExerciseType } from '../../models/exercise.model';
 import { Tag } from '../../models/tag.model';
 import { ExerciseService } from '../../services/exercise.service';
 import { TagService } from '../../services/tag.service';
@@ -122,10 +119,13 @@ export class ExerciseListComponent implements OnInit {
     return this.typeLabels[type] ?? 'Exercise';
   }
 
+  hasSearch(): boolean {
+    return Boolean(this.searchControl.value.trim());
+  }
+
   private showError(error: unknown): void {
     this.loading = false;
-    const message =
-      error instanceof Error ? error.message : 'Something went wrong while loading exercises.';
+    const message = apiErrorMessage(error, 'Something went wrong while loading exercises.');
     this.snackBar.open(message, 'Close', { duration: 4500 });
   }
 }

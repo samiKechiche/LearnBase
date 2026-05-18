@@ -101,7 +101,7 @@ public class PracticeSessionService
                 }
             }
 
-            _context.SessionExerciseResults.Add(new SessionExerciseResult
+            var result = new SessionExerciseResult
             {
                 SessionExerciseResultId = Guid.NewGuid(),
                 SessionId = session.SessionId,
@@ -111,7 +111,10 @@ public class PracticeSessionService
                 ResultStatus = ResultStatus.Skipped, // Default until answered
                 OrderIndex = orderIndex++,
                 CreatedAt = DateTime.UtcNow
-            });
+            };
+
+            session.SessionExerciseResults.Add(result);
+            _context.SessionExerciseResults.Add(result);
         }
 
         await _context.SaveChangesAsync();

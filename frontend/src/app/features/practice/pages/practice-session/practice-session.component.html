@@ -5,8 +5,12 @@
       <h1>{{ session?.practiceSetTitle || 'Practice session' }}</h1>
     </div>
 
-    <button mat-stroked-button type="button" (click)="endSession()" [disabled]="!session">
-      <mat-icon>stop_circle</mat-icon>
+    <button mat-stroked-button type="button" (click)="endSession()" [disabled]="!session || ending">
+      @if (ending) {
+        <mat-spinner diameter="18"></mat-spinner>
+      } @else {
+        <mat-icon>stop_circle</mat-icon>
+      }
       End session
     </button>
   </div>
@@ -39,7 +43,7 @@
             <div class="question-topline">
               <span>Question {{ currentIndex + 1 }}</span>
               @if (isComplete(result)) {
-                <span class="status-chip">Answered</span>
+                <span class="status-chip">{{ resultStatusLabel(result) }}</span>
               }
             </div>
 
@@ -53,29 +57,47 @@
               </mat-radio-group>
             } @else if (currentExerciseType() === ExerciseType.Flashcard) {
               <div class="flashcard-actions">
-                <button mat-stroked-button type="button" (click)="showFlashcardAnswer = true">
-                  <mat-icon>visibility</mat-icon>
-                  Show answer
-                </button>
+                @if (!isComplete(result)) {
+                  <button mat-stroked-button type="button" (click)="showFlashcardAnswer = true">
+                    <mat-icon>visibility</mat-icon>
+                    Show answer
+                  </button>
 
-                @if (showFlashcardAnswer) {
+                  @if (showFlashcardAnswer) {
+                    <div class="answer-reveal">{{ result.correctAnswer }}</div>
+                    <div class="button-row">
+                      <button
+                        mat-flat-button
+                        color="primary"
+                        type="button"
+                        (click)="submitFlashcard(true)"
+                        [disabled]="submitting"
+                      >
+                        I knew it
+                      </button>
+                      <button
+                        mat-stroked-button
+                        color="warn"
+                        type="button"
+                        (click)="submitFlashcard(false)"
+                        [disabled]="submitting"
+                      >
+                        Missed
+                      </button>
+                    </div>
+                  }
+                } @else {
                   <div class="answer-reveal">{{ result.correctAnswer }}</div>
-                  <div class="button-row">
-                    <button mat-flat-button color="primary" type="button" (click)="submitFlashcard(true)">
-                      I knew it
-                    </button>
-                    <button mat-stroked-button color="warn" type="button" (click)="submitFlashcard(false)">
-                      Missed
-                    </button>
-                  </div>
                 }
               </div>
             } @else {
-              <mat-form-field appearance="outline">
-                <mat-label>Answer</mat-label>
-                <textarea matInput rows="4" [formControl]="answerControl"></textarea>
-                <mat-error>Answer is required.</mat-error>
-              </mat-form-field>
+              @if (!isComplete(result)) {
+                <mat-form-field appearance="outline">
+                  <mat-label>Answer</mat-label>
+                  <textarea matInput rows="4" [formControl]="answerControl"></textarea>
+                  <mat-error>Answer is required.</mat-error>
+                </mat-form-field>
+              }
             }
 
             @if (isComplete(result)) {
@@ -88,14 +110,33 @@
           </mat-card-content>
 
           <mat-card-actions align="end">
-            <button mat-button type="button" (click)="goToPrevious()" [disabled]="currentIndex === 0">
+            <button
+              mat-button
+              type="button"
+              (click)="goToPrevious()"
+              [disabled]="currentIndex === 0"
+            >
               Previous
             </button>
-            <button mat-button type="button" (click)="goToNext()" [disabled]="currentIndex >= session.results.length - 1">
+            <button
+              mat-button
+              type="button"
+              (click)="goToNext()"
+              [disabled]="currentIndex >= session.results.length - 1"
+            >
               Next
             </button>
-            <button mat-stroked-button type="button" (click)="skipCurrent()" [disabled]="isComplete(result)">
-              <mat-icon>skip_next</mat-icon>
+            <button
+              mat-stroked-button
+              type="button"
+              (click)="skipCurrent()"
+              [disabled]="skipping || submitting || isComplete(result)"
+            >
+              @if (skipping) {
+                <mat-spinner diameter="18"></mat-spinner>
+              } @else {
+                <mat-icon>skip_next</mat-icon>
+              }
               Skip
             </button>
             @if (currentExerciseType() !== ExerciseType.Flashcard) {
@@ -104,7 +145,7 @@
                 color="primary"
                 type="button"
                 (click)="submitAnswer()"
-                [disabled]="submitting || isComplete(result)"
+                [disabled]="submitting || skipping || isComplete(result)"
               >
                 @if (submitting) {
                   <mat-spinner diameter="18"></mat-spinner>
@@ -120,7 +161,19 @@
         <div class="empty-state">
           <mat-icon>task_alt</mat-icon>
           <h2>Session complete</h2>
-          <button mat-flat-button color="primary" type="button" (click)="endSession()">View results</button>
+          <button
+            mat-flat-button
+            color="primary"
+            type="button"
+            (click)="endSession(false)"
+            [disabled]="ending"
+          >
+            @if (ending) {
+              <mat-spinner diameter="18"></mat-spinner>
+            } @else {
+              View results
+            }
+          </button>
         </div>
       }
     </div>

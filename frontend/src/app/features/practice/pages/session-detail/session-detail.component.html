@@ -16,7 +16,13 @@
         <mat-icon>arrow_back</mat-icon>
         History
       </a>
-      <button mat-stroked-button color="warn" type="button" (click)="deleteSession()" [disabled]="!session">
+      <button
+        mat-stroked-button
+        color="warn"
+        type="button"
+        (click)="deleteSession()"
+        [disabled]="!session"
+      >
         <mat-icon>delete</mat-icon>
         Delete
       </button>
@@ -32,7 +38,7 @@
       <mat-card>
         <mat-card-content>
           <span>Score</span>
-          <strong>{{ session.scorePercentage ?? 0 }}%</strong>
+          <strong>{{ scoreLabel() }}</strong>
         </mat-card-content>
       </mat-card>
       <mat-card>
@@ -66,7 +72,7 @@
 
         <ng-container matColumnDef="userAnswer">
           <th mat-header-cell *matHeaderCellDef>Your answer</th>
-          <td mat-cell *matCellDef="let result">{{ result.userAnswer || 'Skipped' }}</td>
+          <td mat-cell *matCellDef="let result">{{ answerLabel(result) }}</td>
         </ng-container>
 
         <ng-container matColumnDef="correctAnswer">
@@ -78,7 +84,7 @@
           <th mat-header-cell *matHeaderCellDef>Status</th>
           <td mat-cell *matCellDef="let result">
             <span class="status-chip" [ngClass]="statusClass(result.resultStatus)">
-              {{ statusLabel(result.resultStatus) }}
+              {{ statusLabel(result) }}
             </span>
           </td>
         </ng-container>

@@ -10,7 +10,13 @@
         <mat-icon>play_arrow</mat-icon>
         Practice
       </a>
-      <button mat-stroked-button color="warn" type="button" (click)="deleteAllSessions()" [disabled]="sessions.length === 0">
+      <button
+        mat-stroked-button
+        color="warn"
+        type="button"
+        (click)="deleteAllSessions()"
+        [disabled]="sessions.length === 0"
+      >
         <mat-icon>delete_sweep</mat-icon>
         Delete all
       </button>
@@ -32,7 +38,7 @@
       <mat-card>
         <mat-card-content>
           <span>Accuracy</span>
-          <strong>{{ stats?.overallAccuracyPercentage ?? 0 }}%</strong>
+          <strong>{{ accuracyLabel() }}</strong>
         </mat-card-content>
       </mat-card>
       <mat-card>
@@ -78,7 +84,7 @@
           <ng-container matColumnDef="counts">
             <th mat-header-cell *matHeaderCellDef>Results</th>
             <td mat-cell *matCellDef="let session">
-              {{ session.correctCount }} / {{ session.incorrectCount }} / {{ session.skippedCount }}
+              {{ resultSummary(session) }}
             </td>
           </ng-container>
 
@@ -95,14 +101,28 @@
             <th mat-header-cell *matHeaderCellDef></th>
             <td mat-cell *matCellDef="let session" class="actions-cell">
               @if (session.isActive) {
-                <a mat-icon-button [routerLink]="['/practice/session', session.sessionId]" matTooltip="Continue">
+                <a
+                  mat-icon-button
+                  [routerLink]="['/practice/session', session.sessionId]"
+                  matTooltip="Continue"
+                >
                   <mat-icon>play_arrow</mat-icon>
                 </a>
               }
-              <a mat-icon-button [routerLink]="['/practice/history', session.sessionId]" matTooltip="Details">
+              <a
+                mat-icon-button
+                [routerLink]="['/practice/history', session.sessionId]"
+                matTooltip="Details"
+              >
                 <mat-icon>visibility</mat-icon>
               </a>
-              <button mat-icon-button color="warn" type="button" matTooltip="Delete" (click)="deleteSession(session)">
+              <button
+                mat-icon-button
+                color="warn"
+                type="button"
+                matTooltip="Delete"
+                (click)="deleteSession(session)"
+              >
                 <mat-icon>delete</mat-icon>
               </button>
             </td>

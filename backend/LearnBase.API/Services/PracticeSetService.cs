@@ -60,6 +60,7 @@ public class PracticeSetService
     {
         IQueryable<PracticeSet> query = _context.PracticeSets
             .Include(ps => ps.Lesson)
+            .Include(ps => ps.PracticeSessions)
             .Include(ps => ps.PracticeSetExercises)
                 .ThenInclude(pse => pse.Exercise)
             .Where(ps => ps.UserId == userId);
@@ -106,6 +107,7 @@ public class PracticeSetService
     {
         var set = await _context.PracticeSets
             .Include(ps => ps.Lesson)
+            .Include(ps => ps.PracticeSessions)
             .Include(ps => ps.PracticeSetExercises)
                 .ThenInclude(pse => pse.Exercise)
             .FirstOrDefaultAsync(ps => ps.PracticeSetId == practiceSetId && ps.UserId == userId);
@@ -143,6 +145,7 @@ public class PracticeSetService
         // Reload with includes
         set = await _context.PracticeSets
             .Include(ps => ps.Lesson)
+            .Include(ps => ps.PracticeSessions)
             .Include(ps => ps.PracticeSetExercises)
                 .ThenInclude(pse => pse.Exercise)
             .FirstAsync(ps => ps.PracticeSetId == practiceSetId);
@@ -243,6 +246,7 @@ public class PracticeSetService
         // Reload
         set = await _context.PracticeSets
             .Include(ps => ps.Lesson)
+            .Include(ps => ps.PracticeSessions)
             .Include(ps => ps.PracticeSetExercises)
                 .ThenInclude(pse => pse.Exercise)
             .FirstAsync(ps => ps.PracticeSetId == practiceSetId);
@@ -396,6 +400,7 @@ public class PracticeSetService
         // Reload with includes
         practiceSet = await _context.PracticeSets
             .Include(ps => ps.Lesson)
+            .Include(ps => ps.PracticeSessions)
             .Include(ps => ps.PracticeSetExercises)
                 .ThenInclude(pse => pse.Exercise)
             .FirstAsync(ps => ps.PracticeSetId == practiceSet.PracticeSetId);
@@ -441,6 +446,7 @@ public class PracticeSetService
         // Reload
         set = await _context.PracticeSets
             .Include(ps => ps.Lesson)
+            .Include(ps => ps.PracticeSessions)
             .Include(ps => ps.PracticeSetExercises)
                 .ThenInclude(pse => pse.Exercise)
             .FirstAsync(ps => ps.PracticeSetId == practiceSetId);
@@ -478,6 +484,7 @@ public class PracticeSetService
         // FIXED: Use Include to load related data for the response
         var reloadedSet = await _context.PracticeSets
             .Include(ps => ps.Lesson)
+            .Include(ps => ps.PracticeSessions)
             .Include(ps => ps.PracticeSetExercises)
                 .ThenInclude(pse => pse.Exercise)
             .FirstOrDefaultAsync(ps => ps.PracticeSetId == practiceSetId);

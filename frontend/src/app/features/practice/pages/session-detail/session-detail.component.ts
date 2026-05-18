@@ -10,11 +10,13 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
+import { apiErrorMessage } from '../../../../core/http/api-error';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import {
   PracticeSession,
   RESULT_STATUS_LABELS,
   ResultStatus,
+  SessionExerciseResult,
 } from '../../models/practice-session.model';
 import { PracticeSessionService } from '../../services/practice-session.service';
 
@@ -94,8 +96,38 @@ export class SessionDetailComponent implements OnInit {
     return `status-${status}`;
   }
 
-  statusLabel(status: ResultStatus): string {
-    return this.statusLabels[status] ?? 'Skipped';
+  statusLabel(result: SessionExerciseResult): string {
+    if (
+      this.session?.isActive &&
+      result.resultStatus === ResultStatus.Skipped &&
+      !result.userAnswer
+    ) {
+      return 'Pending';
+    }
+
+    return this.statusLabels[result.resultStatus] ?? 'Skipped';
+  }
+
+  answerLabel(result: SessionExerciseResult): string {
+    if (
+      this.session?.isActive &&
+      result.resultStatus === ResultStatus.Skipped &&
+      !result.userAnswer
+    ) {
+      return 'Not answered';
+    }
+
+    return result.userAnswer || 'Skipped';
+  }
+
+  scoreLabel(): string {
+    if (this.session?.isActive) {
+      return 'In progress';
+    }
+
+    return this.session?.scorePercentage === null || this.session?.scorePercentage === undefined
+      ? 'No score'
+      : `${this.session.scorePercentage}%`;
   }
 
   private loadSession(sessionId: string): void {
@@ -115,8 +147,7 @@ export class SessionDetailComponent implements OnInit {
 
   private showError(error: unknown): void {
     this.loading = false;
-    const message =
-      error instanceof Error ? error.message : 'Something went wrong while loading session details.';
+    const message = apiErrorMessage(error, 'Something went wrong while loading session details.');
     this.snackBar.open(message, 'Close', { duration: 4500 });
   }
 }

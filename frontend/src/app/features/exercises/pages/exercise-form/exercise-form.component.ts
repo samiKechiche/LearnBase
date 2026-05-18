@@ -22,6 +22,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map, switchMap } from 'rxjs';
 
+import { apiErrorMessage } from '../../../../core/http/api-error';
 import {
   EXERCISE_TYPE_LABELS,
   Exercise,
@@ -107,7 +108,7 @@ export class ExerciseFormComponent implements OnInit {
     if (this.exerciseId) {
       this.loadExercise(this.exerciseId);
     } else {
-      this.ensureMinimumOptions();
+      this.applyTypeRules(ExerciseType.MCQ);
     }
   }
 
@@ -212,13 +213,18 @@ export class ExerciseFormComponent implements OnInit {
     this.currentTagIds = exercise.tagIds ?? [];
     this.options.clear();
 
-    this.form.patchValue({
-      type: exercise.type,
-      question: exercise.question,
-      answer: exercise.answer,
-      tagIds: this.currentTagIds,
-      correctOptionIndex: 1,
-    });
+    this.form.patchValue(
+      {
+        type: exercise.type,
+        question: exercise.question,
+        answer: exercise.answer,
+        tagIds: this.currentTagIds,
+        correctOptionIndex: 1,
+      },
+      { emitEvent: false },
+    );
+
+    this.configureAnswerValidation(exercise.type);
 
     if (exercise.type === ExerciseType.MCQ) {
       const options = [...(exercise.options ?? [])].sort((a, b) => a.orderIndex - b.orderIndex);
@@ -237,10 +243,34 @@ export class ExerciseFormComponent implements OnInit {
 
   private watchTypeChanges(): void {
     this.form.get('type')?.valueChanges.subscribe((type) => {
-      if (Number(type) === ExerciseType.MCQ) {
-        this.ensureMinimumOptions();
-      }
+      this.applyTypeRules(Number(type) as ExerciseType);
     });
+  }
+
+  private applyTypeRules(type: ExerciseType): void {
+    this.configureAnswerValidation(type);
+
+    if (type === ExerciseType.MCQ) {
+      this.ensureMinimumOptions();
+      if (!this.form.get('correctOptionIndex')?.value) {
+        this.form.patchValue({ correctOptionIndex: 1 }, { emitEvent: false });
+      }
+      return;
+    }
+
+    this.options.clear();
+    this.form.patchValue({ correctOptionIndex: null }, { emitEvent: false });
+  }
+
+  private configureAnswerValidation(type: ExerciseType): void {
+    const answerControl = this.form.get('answer');
+    const validators =
+      type === ExerciseType.MCQ
+        ? [Validators.maxLength(1000)]
+        : [Validators.required, Validators.maxLength(1000)];
+
+    answerControl?.setValidators(validators);
+    answerControl?.updateValueAndValidity({ emitEvent: false });
   }
 
   private ensureMinimumOptions(): void {
@@ -275,7 +305,7 @@ export class ExerciseFormComponent implements OnInit {
       return false;
     }
 
-    return this.form.valid;
+    return Boolean(this.form.get('question')?.valid && this.form.get('answer')?.valid);
   }
 
   private buildPayload(): SaveExerciseRequest {
@@ -315,8 +345,7 @@ export class ExerciseFormComponent implements OnInit {
   private showError(error: unknown): void {
     this.loading = false;
     this.saving = false;
-    const message =
-      error instanceof Error ? error.message : 'Something went wrong while saving the exercise.';
+    const message = apiErrorMessage(error, 'Something went wrong while saving the exercise.');
     this.snackBar.open(message, 'Close', { duration: 4500 });
   }
 }

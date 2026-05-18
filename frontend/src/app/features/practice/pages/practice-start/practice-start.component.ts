@@ -11,6 +11,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Router, RouterLink } from '@angular/router';
 
+import { apiErrorMessage } from '../../../../core/http/api-error';
 import { PracticeSet } from '../../models/practice-set.model';
 import { PracticeOrder } from '../../models/practice-session.model';
 import { PracticeSetService } from '../../services/practice-set.service';
@@ -97,11 +98,14 @@ export class PracticeStartComponent implements OnInit {
     return this.practiceSets.find((set) => set.practiceSetId === this.form.value.practiceSetId);
   }
 
+  hasReadyPracticeSets(): boolean {
+    return this.practiceSets.some((set) => set.exerciseCount > 0);
+  }
+
   private showError(error: unknown): void {
     this.loading = false;
     this.starting = false;
-    const message =
-      error instanceof Error ? error.message : 'Something went wrong while starting practice.';
+    const message = apiErrorMessage(error, 'Something went wrong while starting practice.');
     this.snackBar.open(message, 'Close', { duration: 4500 });
   }
 }

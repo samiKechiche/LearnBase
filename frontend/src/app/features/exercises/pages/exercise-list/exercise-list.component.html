@@ -31,8 +31,14 @@
   } @else if (exercises.length === 0) {
     <div class="empty-state">
       <mat-icon>quiz</mat-icon>
-      <h2>No exercises yet</h2>
-      <a mat-flat-button color="primary" routerLink="/exercises/new">Create exercise</a>
+      <h2>{{ hasSearch() ? 'No matching exercises' : 'No exercises yet' }}</h2>
+      @if (hasSearch()) {
+        <button mat-stroked-button type="button" (click)="searchControl.setValue('')">
+          Clear search
+        </button>
+      } @else {
+        <a mat-flat-button color="primary" routerLink="/exercises/new">Create exercise</a>
+      }
     </div>
   } @else {
     <div class="table-shell">

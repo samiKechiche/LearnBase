@@ -21,6 +21,12 @@
       <h2>No practice sets yet</h2>
       <a mat-flat-button color="primary" routerLink="/practice-sets">Create set</a>
     </div>
+  } @else if (!hasReadyPracticeSets()) {
+    <div class="empty-state">
+      <mat-icon>playlist_add_check</mat-icon>
+      <h2>Add exercises before practicing</h2>
+      <a mat-flat-button color="primary" routerLink="/practice-sets">Manage sets</a>
+    </div>
   } @else {
     <mat-card>
       <mat-card-content>
@@ -29,7 +35,10 @@
             <mat-label>Practice set</mat-label>
             <mat-select formControlName="practiceSetId">
               @for (practiceSet of practiceSets; track practiceSet.practiceSetId) {
-                <mat-option [value]="practiceSet.practiceSetId" [disabled]="practiceSet.exerciseCount === 0">
+                <mat-option
+                  [value]="practiceSet.practiceSetId"
+                  [disabled]="practiceSet.exerciseCount === 0"
+                >
                   {{ practiceSet.title }} ({{ practiceSet.exerciseCount }})
                 </mat-option>
               }

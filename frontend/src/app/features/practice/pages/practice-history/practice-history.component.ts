@@ -11,6 +11,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 
+import { apiErrorMessage } from '../../../../core/http/api-error';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { PracticeStats, SessionSummary } from '../../models/practice-session.model';
 import { PracticeSessionService } from '../../services/practice-session.service';
@@ -33,7 +34,14 @@ import { PracticeSessionService } from '../../services/practice-session.service'
   styleUrl: './practice-history.component.css',
 })
 export class PracticeHistoryComponent implements OnInit {
-  readonly displayedColumns = ['practiceSetTitle', 'startedAt', 'score', 'counts', 'status', 'actions'];
+  readonly displayedColumns = [
+    'practiceSetTitle',
+    'startedAt',
+    'score',
+    'counts',
+    'status',
+    'actions',
+  ];
 
   stats: PracticeStats | null = null;
   sessions: SessionSummary[] = [];
@@ -116,15 +124,34 @@ export class PracticeHistoryComponent implements OnInit {
   }
 
   scoreLabel(session: SessionSummary): string {
+    if (session.isActive) {
+      return 'In progress';
+    }
+
     return session.scorePercentage === null || session.scorePercentage === undefined
       ? 'No score'
       : `${session.scorePercentage}%`;
   }
 
+  accuracyLabel(): string {
+    return this.stats?.overallAccuracyPercentage === null ||
+      this.stats?.overallAccuracyPercentage === undefined
+      ? 'No score'
+      : `${this.stats.overallAccuracyPercentage}%`;
+  }
+
+  resultSummary(session: SessionSummary): string {
+    if (session.isActive) {
+      const answered = session.correctCount + session.incorrectCount;
+      return `${answered} answered of ${session.totalExercises}`;
+    }
+
+    return `${session.correctCount} correct, ${session.incorrectCount} incorrect, ${session.skippedCount} skipped`;
+  }
+
   private showError(error: unknown): void {
     this.loading = false;
-    const message =
-      error instanceof Error ? error.message : 'Something went wrong while loading history.';
+    const message = apiErrorMessage(error, 'Something went wrong while loading history.');
     this.snackBar.open(message, 'Close', { duration: 4500 });
   }
 }

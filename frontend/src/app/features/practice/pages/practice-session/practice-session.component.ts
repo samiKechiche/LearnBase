@@ -15,6 +15,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 
+import { apiErrorMessage } from '../../../../core/http/api-error';
 import { Exercise, ExerciseOption, ExerciseType } from '../../../exercises/models/exercise.model';
 import { ExerciseService } from '../../../exercises/services/exercise.service';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
@@ -51,13 +52,18 @@ export class PracticeSessionComponent implements OnInit {
   readonly ResultStatus = ResultStatus;
 
   answerControl = new FormControl('', { nonNullable: true, validators: [Validators.required] });
-  selectedOptionControl = new FormControl('', { nonNullable: true, validators: [Validators.required] });
+  selectedOptionControl = new FormControl('', {
+    nonNullable: true,
+    validators: [Validators.required],
+  });
 
   session: PracticeSession | null = null;
   exerciseMap = new Map<string, Exercise>();
   currentIndex = 0;
   loading = false;
   submitting = false;
+  skipping = false;
+  ending = false;
   showFlashcardAnswer = false;
   private skippedResultIds = new Set<string>();
 
@@ -102,18 +108,25 @@ export class PracticeSessionComponent implements OnInit {
   }
 
   correctCount(): number {
-    return this.session?.results.filter((result) => result.resultStatus === ResultStatus.Correct).length ?? 0;
+    return (
+      this.session?.results.filter((result) => result.resultStatus === ResultStatus.Correct)
+        .length ?? 0
+    );
   }
 
   incorrectCount(): number {
     return (
-      this.session?.results.filter((result) => result.resultStatus === ResultStatus.Incorrect).length ?? 0
+      this.session?.results.filter((result) => result.resultStatus === ResultStatus.Incorrect)
+        .length ?? 0
     );
   }
 
   skippedCount(): number {
-    return this.session?.results.filter((result) => this.skippedResultIds.has(result.sessionExerciseResultId))
-      .length ?? 0;
+    return (
+      this.session?.results.filter((result) =>
+        this.skippedResultIds.has(result.sessionExerciseResultId),
+      ).length ?? 0
+    );
   }
 
   progressValue(): number {
@@ -131,7 +144,7 @@ export class PracticeSessionComponent implements OnInit {
 
   submitAnswer(): void {
     const result = this.currentResult();
-    if (!this.session || !result?.exerciseId) {
+    if (!this.session || !result?.exerciseId || this.isComplete(result)) {
       return;
     }
 
@@ -156,9 +169,13 @@ export class PracticeSessionComponent implements OnInit {
         next: (updatedResult) => {
           this.replaceResult(updatedResult);
           this.submitting = false;
-          this.snackBar.open(updatedResult.resultStatus === ResultStatus.Correct ? 'Correct' : 'Incorrect', 'Close', {
-            duration: 1800,
-          });
+          this.snackBar.open(
+            updatedResult.resultStatus === ResultStatus.Correct ? 'Correct' : 'Incorrect',
+            'Close',
+            {
+              duration: 1800,
+            },
+          );
           this.goToNextPending();
         },
         error: (error) => this.showError(error),
@@ -167,7 +184,7 @@ export class PracticeSessionComponent implements OnInit {
 
   submitFlashcard(knewAnswer: boolean): void {
     const result = this.currentResult();
-    if (!result) {
+    if (!result || this.isComplete(result) || this.submitting) {
       return;
     }
 
@@ -177,10 +194,11 @@ export class PracticeSessionComponent implements OnInit {
 
   skipCurrent(): void {
     const result = this.currentResult();
-    if (!this.session || !result?.exerciseId) {
+    if (!this.session || !result?.exerciseId || this.isComplete(result)) {
       return;
     }
 
+    this.skipping = true;
     this.practiceSessionService
       .skipExercise(this.session.sessionId, { exerciseId: result.exerciseId })
       .subscribe({
@@ -188,6 +206,7 @@ export class PracticeSessionComponent implements OnInit {
           this.replaceResult(updatedResult);
           this.skippedResultIds.add(updatedResult.sessionExerciseResultId);
           this.saveSkippedIds();
+          this.skipping = false;
           this.goToNextPending();
         },
         error: (error) => this.showError(error),
@@ -208,8 +227,13 @@ export class PracticeSessionComponent implements OnInit {
     this.resetAnswerControls();
   }
 
-  endSession(): void {
+  endSession(confirm = true): void {
     if (!this.session) {
+      return;
+    }
+
+    if (!confirm) {
+      this.finishSession();
       return;
     }
 
@@ -228,14 +252,20 @@ export class PracticeSessionComponent implements OnInit {
         return;
       }
 
-      this.practiceSessionService.endSession(this.session.sessionId).subscribe({
-        next: (session) => {
-          sessionStorage.removeItem(this.storageKey(session.sessionId));
-          this.router.navigate(['/practice/results', session.sessionId]);
-        },
-        error: (error) => this.showError(error),
-      });
+      this.finishSession();
     });
+  }
+
+  resultStatusLabel(result: SessionExerciseResult): string {
+    if (result.resultStatus === ResultStatus.Correct) {
+      return 'Correct';
+    }
+
+    if (result.resultStatus === ResultStatus.Incorrect) {
+      return 'Incorrect';
+    }
+
+    return 'Skipped';
   }
 
   private loadSession(sessionId: string): void {
@@ -247,6 +277,11 @@ export class PracticeSessionComponent implements OnInit {
       exercises: this.exerciseService.getExercises(),
     }).subscribe({
       next: ({ session, exercises }) => {
+        if (!session.isActive) {
+          this.router.navigate(['/practice/results', session.sessionId]);
+          return;
+        }
+
         this.session = {
           ...session,
           results: [...session.results].sort((a, b) => a.orderIndex - b.orderIndex),
@@ -268,7 +303,9 @@ export class PracticeSessionComponent implements OnInit {
     this.session = {
       ...this.session,
       results: this.session.results.map((result) =>
-        result.sessionExerciseResultId === updatedResult.sessionExerciseResultId ? updatedResult : result,
+        result.sessionExerciseResultId === updatedResult.sessionExerciseResultId
+          ? updatedResult
+          : result,
       ),
     };
   }
@@ -284,7 +321,9 @@ export class PracticeSessionComponent implements OnInit {
     }
 
     const results = this.session.results;
-    const orderedIndexes = [...results.keys()].slice(startIndex).concat([...results.keys()].slice(0, startIndex));
+    const orderedIndexes = [...results.keys()]
+      .slice(startIndex)
+      .concat([...results.keys()].slice(0, startIndex));
     const nextIndex = orderedIndexes.find((index) => !this.isComplete(results[index]));
 
     return nextIndex ?? results.length;
@@ -298,7 +337,11 @@ export class PracticeSessionComponent implements OnInit {
 
   private loadSkippedIds(sessionId: string): void {
     const stored = sessionStorage.getItem(this.storageKey(sessionId));
-    this.skippedResultIds = new Set(stored ? (JSON.parse(stored) as string[]) : []);
+    try {
+      this.skippedResultIds = new Set(stored ? (JSON.parse(stored) as string[]) : []);
+    } catch {
+      this.skippedResultIds = new Set<string>();
+    }
   }
 
   private saveSkippedIds(): void {
@@ -306,18 +349,37 @@ export class PracticeSessionComponent implements OnInit {
       return;
     }
 
-    sessionStorage.setItem(this.storageKey(this.session.sessionId), JSON.stringify([...this.skippedResultIds]));
+    sessionStorage.setItem(
+      this.storageKey(this.session.sessionId),
+      JSON.stringify([...this.skippedResultIds]),
+    );
   }
 
   private storageKey(sessionId: string): string {
     return `learnbase_skipped_${sessionId}`;
   }
 
+  private finishSession(): void {
+    if (!this.session || this.ending) {
+      return;
+    }
+
+    this.ending = true;
+    this.practiceSessionService.endSession(this.session.sessionId).subscribe({
+      next: (session) => {
+        sessionStorage.removeItem(this.storageKey(session.sessionId));
+        this.router.navigate(['/practice/results', session.sessionId]);
+      },
+      error: (error) => this.showError(error),
+    });
+  }
+
   private showError(error: unknown): void {
     this.loading = false;
     this.submitting = false;
-    const message =
-      error instanceof Error ? error.message : 'Something went wrong during the practice session.';
+    this.skipping = false;
+    this.ending = false;
+    const message = apiErrorMessage(error, 'Something went wrong during the practice session.');
     this.snackBar.open(message, 'Close', { duration: 4500 });
   }
 }

@@ -94,7 +94,10 @@
             >
               <span>
                 <strong>{{ practiceSet.title }}</strong>
-                <small>{{ practiceSet.exerciseCount }} exercises · {{ practiceSet.sessionCount }} sessions</small>
+                <small
+                  >{{ practiceSet.exerciseCount }} exercises &middot;
+                  {{ practiceSet.sessionCount }} sessions</small
+                >
               </span>
               <mat-icon>chevron_right</mat-icon>
             </button>
@@ -124,7 +127,15 @@
                   <mat-icon>edit</mat-icon>
                   Edit
                 </button>
-                <button mat-stroked-button color="warn" type="button" (click)="deleteSet(selectedSet)">
+                <button
+                  mat-stroked-button
+                  color="warn"
+                  type="button"
+                  (click)="deleteSet(selectedSet)"
+                  [matTooltip]="
+                    canDeleteSet(selectedSet) ? 'Delete' : 'Delete session history first'
+                  "
+                >
                   <mat-icon>delete</mat-icon>
                   Delete
                 </button>
@@ -144,20 +155,35 @@
                   </mat-select>
                 </mat-form-field>
 
-                <button mat-flat-button color="primary" type="button" (click)="addExercise()">
+                <button
+                  mat-flat-button
+                  color="primary"
+                  type="button"
+                  (click)="addExercise()"
+                  [disabled]="!selectedExerciseControl.value || availableExercises().length === 0"
+                >
                   <mat-icon>add</mat-icon>
                   Add
                 </button>
               </div>
 
               <div class="exercise-stack">
+                @if (availableExercises().length === 0 && exercises.length > 0) {
+                  <p class="muted">All available exercises are already in this set.</p>
+                }
+
                 @for (exercise of selectedSet.exercises ?? []; track exercise.exerciseId) {
                   <div class="exercise-row">
                     <span>
                       <strong>{{ exercise.question }}</strong>
                       <small>{{ exerciseTypeLabel(exercise.type) }}</small>
                     </span>
-                    <button mat-icon-button color="warn" type="button" (click)="removeExercise(exercise)">
+                    <button
+                      mat-icon-button
+                      color="warn"
+                      type="button"
+                      (click)="removeExercise(exercise)"
+                    >
                       <mat-icon>remove_circle</mat-icon>
                     </button>
                   </div>
