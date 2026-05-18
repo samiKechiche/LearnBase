@@ -1,0 +1,72 @@
+.split-layout {
+  align-items: start;
+  display: grid;
+  gap: 24px;
+  grid-template-columns: minmax(320px, 420px) 1fr;
+}
+
+.stack,
+.compact-form,
+.detail-stack,
+.exercise-stack {
+  display: grid;
+  gap: 16px;
+}
+
+.form-actions,
+.set-actions,
+.add-exercise-row,
+.exercise-row,
+.set-list-item {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+}
+
+.form-actions,
+.set-actions {
+  justify-content: flex-end;
+}
+
+.add-exercise-row mat-form-field {
+  flex: 1;
+}
+
+.set-list {
+  display: grid;
+  gap: 10px;
+}
+
+.set-list-item {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  justify-content: space-between;
+  padding: 14px 16px;
+  text-align: left;
+}
+
+.set-list-item.active {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
+}
+
+.set-list-item small,
+.exercise-row small {
+  color: #6b7280;
+  display: block;
+  margin-top: 3px;
+}
+
+.exercise-row {
+  border-bottom: 1px solid #eef2f7;
+  justify-content: space-between;
+  padding: 8px 0;
+}
+
+@media (max-width: 900px) {
+  .split-layout {
+    grid-template-columns: 1fr;
+  }
+}

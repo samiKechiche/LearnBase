@@ -26,7 +26,9 @@ public class UpdateExerciseDto
     public List<ExerciseOptionDto>? Options { get; set; }
 
     /// <summary>
-    /// For MCQ: Which option is correct (must be in Options list)
+    /// Required only for MCQ type.
+    /// Specifies which option is correct by its OrderIndex.
+    /// This matches CreateExerciseDto and avoids stale option IDs when options are replaced.
     /// </summary>
-    public Guid? CorrectOptionId { get; set; }
+    public int? CorrectOptionIndex { get; set; }
 }

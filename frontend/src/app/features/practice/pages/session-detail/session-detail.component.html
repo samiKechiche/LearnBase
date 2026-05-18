@@ -1,0 +1,97 @@
+<section class="page-shell">
+  <div class="page-header">
+    <div>
+      <p class="eyebrow">Practice History / Statistics</p>
+      <h1>{{ session?.practiceSetTitle || 'Session details' }}</h1>
+    </div>
+
+    <div class="header-actions">
+      @if (session?.isActive) {
+        <a mat-flat-button color="primary" [routerLink]="['/practice/session', session?.sessionId]">
+          <mat-icon>play_arrow</mat-icon>
+          Continue
+        </a>
+      }
+      <a mat-stroked-button routerLink="/practice/history">
+        <mat-icon>arrow_back</mat-icon>
+        History
+      </a>
+      <button mat-stroked-button color="warn" type="button" (click)="deleteSession()" [disabled]="!session">
+        <mat-icon>delete</mat-icon>
+        Delete
+      </button>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="loading-state">
+      <mat-spinner diameter="36"></mat-spinner>
+    </div>
+  } @else if (session) {
+    <div class="summary-grid">
+      <mat-card>
+        <mat-card-content>
+          <span>Score</span>
+          <strong>{{ session.scorePercentage ?? 0 }}%</strong>
+        </mat-card-content>
+      </mat-card>
+      <mat-card>
+        <mat-card-content>
+          <span>Correct</span>
+          <strong>{{ session.correctCount }}</strong>
+        </mat-card-content>
+      </mat-card>
+      <mat-card>
+        <mat-card-content>
+          <span>Incorrect</span>
+          <strong>{{ session.incorrectCount }}</strong>
+        </mat-card-content>
+      </mat-card>
+      <mat-card>
+        <mat-card-content>
+          <span>Skipped</span>
+          <strong>{{ session.skippedCount }}</strong>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <div class="table-shell">
+      <table mat-table [dataSource]="session.results">
+        <ng-container matColumnDef="question">
+          <th mat-header-cell *matHeaderCellDef>Question</th>
+          <td mat-cell *matCellDef="let result">
+            <strong>{{ result.question }}</strong>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="userAnswer">
+          <th mat-header-cell *matHeaderCellDef>Your answer</th>
+          <td mat-cell *matCellDef="let result">{{ result.userAnswer || 'Skipped' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="correctAnswer">
+          <th mat-header-cell *matHeaderCellDef>Correct answer</th>
+          <td mat-cell *matCellDef="let result">{{ result.correctAnswer }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="resultStatus">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let result">
+            <span class="status-chip" [ngClass]="statusClass(result.resultStatus)">
+              {{ statusLabel(result.resultStatus) }}
+            </span>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+    </div>
+  } @else {
+    <div class="empty-state">
+      <mat-icon>history</mat-icon>
+      <h2>Session not found</h2>
+      <a mat-flat-button color="primary" routerLink="/practice/history">History</a>
+    </div>
+  }
+</section>

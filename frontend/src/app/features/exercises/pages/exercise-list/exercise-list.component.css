@@ -1,0 +1,28 @@
+.answer-preview {
+  color: #6b7280;
+  display: block;
+  margin-top: 4px;
+  max-width: 520px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.type-pill {
+  background: #e0f2fe;
+  border-radius: 999px;
+  color: #075985;
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+}
+
+.actions-cell {
+  text-align: right;
+  white-space: nowrap;
+}
+
+mat-form-field {
+  min-width: 280px;
+}

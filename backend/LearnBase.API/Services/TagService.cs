@@ -79,8 +79,8 @@ public class TagService
                 ? query.OrderBy(t => t.CreatedAt)
                 : query.OrderByDescending(t => t.CreatedAt),
             _ => ascending
-                ? query.OrderByDescending(t => t.CreatedAt)
-                : query.OrderBy(t => t.CreatedAt)
+                ? query.OrderBy(t => t.CreatedAt)
+                : query.OrderByDescending(t => t.CreatedAt)
         };
 
         var tags = await query.ToListAsync();

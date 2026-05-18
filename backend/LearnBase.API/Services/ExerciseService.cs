@@ -38,8 +38,8 @@ public class ExerciseService
         {
             ExerciseId = Guid.NewGuid(),
             Type = dto.Type,
-            Question = dto.Question,
-            Answer = dto.Answer,
+            Question = dto.Question.Trim(),
+            Answer = dto.Answer.Trim(),
             UserId = userId,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
@@ -58,7 +58,7 @@ public class ExerciseService
                 {
                     OptionId = Guid.NewGuid(),
                     ExerciseId = exercise.ExerciseId,
-                    Content = optDto.Content,
+                    Content = optDto.Content.Trim(),
                     OrderIndex = optDto.OrderIndex
                 };
 
@@ -75,6 +75,7 @@ public class ExerciseService
                 if (correctOpt != null)
                 {
                     correctOptionId = correctOpt.OptionId;
+                    exercise.Answer = correctOpt.Content;
                 }
             }
 
@@ -100,6 +101,7 @@ public class ExerciseService
     {
         IQueryable<Exercise> query = _context.Exercises
             .Include(e => e.ExerciseOptions)
+            .Include(e => e.ExerciseTags)
             .Where(e => e.UserId == userId);
 
         // Apply search filter
@@ -124,8 +126,8 @@ public class ExerciseService
                 ? query.OrderBy(e => e.CreatedAt)
                 : query.OrderByDescending(e => e.CreatedAt),
             _ => ascending
-                ? query.OrderByDescending(e => e.CreatedAt)
-                : query.OrderBy(e => e.CreatedAt)
+                ? query.OrderBy(e => e.CreatedAt)
+                : query.OrderByDescending(e => e.CreatedAt)
         };
 
         var exercises = await query.ToListAsync();
@@ -179,11 +181,26 @@ public class ExerciseService
                 "Validation failed", validationErrors);
         }
 
+        Guid? correctOptionId = null;
+
+        if (dto.Type == ExerciseType.MCQ && dto.Options != null && dto.CorrectOptionIndex.HasValue)
+        {
+            var correctOption = dto.Options
+                .FirstOrDefault(o => o.OrderIndex == dto.CorrectOptionIndex.Value);
+
+            if (correctOption != null)
+            {
+                exercise.Answer = correctOption.Content.Trim();
+            }
+        }
+
         // Update basic fields
         exercise.Type = dto.Type;
-        exercise.Question = dto.Question;
-        exercise.Answer = dto.Answer;
-        exercise.CorrectOptionId = dto.CorrectOptionId;
+        exercise.Question = dto.Question.Trim();
+        exercise.Answer = exercise.Type == ExerciseType.MCQ
+            ? exercise.Answer
+            : dto.Answer.Trim();
+        exercise.CorrectOptionId = null;
         exercise.UpdatedAt = DateTime.UtcNow;
 
         // Handle options update (remove old, add new)
@@ -196,30 +213,43 @@ public class ExerciseService
             // Add new options
             if (dto.Options != null)
             {
+                var newOptions = new List<ExerciseOption>();
+                var correctOrderIndex = dto.CorrectOptionIndex.GetValueOrDefault();
+
                 foreach (var optDto in dto.Options)
                 {
-                    exercise.ExerciseOptions.Add(new ExerciseOption
+                    var option = new ExerciseOption
                     {
                         OptionId = Guid.NewGuid(),
                         ExerciseId = exercise.ExerciseId,
-                        Content = optDto.Content,
+                        Content = optDto.Content.Trim(),
                         OrderIndex = optDto.OrderIndex
-                    });
+                    };
+
+                    newOptions.Add(option);
+                    exercise.ExerciseOptions.Add(option);
                 }
+
+                correctOptionId = newOptions
+                    .FirstOrDefault(o => o.OrderIndex == correctOrderIndex)?.OptionId;
             }
+
+            exercise.CorrectOptionId = correctOptionId;
         }
         else
         {
             // Non-MCQ shouldn't have options
             _context.ExerciseOptions.RemoveRange(exercise.ExerciseOptions);
             exercise.ExerciseOptions.Clear();
+            exercise.CorrectOptionId = null;
         }
 
         await _context.SaveChangesAsync();
 
         // Reload to get updated data
-        await _context.Exercises
+        exercise = await _context.Exercises
             .Include(e => e.ExerciseOptions)
+            .Include(e => e.ExerciseTags)
             .FirstAsync(e => e.ExerciseId == exerciseId);
 
         return ApiResponseDto<ExerciseResponseDto>.SuccessResponse(
@@ -308,7 +338,7 @@ public class ExerciseService
         var errors = new List<string>();
         ExerciseType type = dto.Type;
         var options = dto.Options as List<ExerciseOptionDto>;
-        Guid? correctOptionId = dto.CorrectOptionId;
+        int? correctOptionIndex = dto.CorrectOptionIndex;
 
         if (type == ExerciseType.MCQ)
         {
@@ -323,20 +353,13 @@ public class ExerciseService
             }
 
             // MCQ must specify correct answer
-            if (!correctOptionId.HasValue)
+            if (!correctOptionIndex.HasValue)
             {
-                errors.Add("MCQ exercises must specify a CorrectOptionId.");
+                errors.Add("MCQ exercises must specify a CorrectOptionIndex.");
             }
-            else if (options != null && !options.Any())
+            else if (options != null && options.Any() && !options.Any(o => o.OrderIndex == correctOptionIndex.Value))
             {
-                // Will be caught above, but check if valid GUID matches
-            }
-
-            // Verify CorrectOptionId exists in options (if options provided)
-            if (correctOptionId.HasValue && options != null && options.Any())
-            {
-                // Note: At creation time, options don't have IDs yet, so we validate by index/order
-                // The controller/service will handle mapping after creation
+                errors.Add($"CorrectOptionIndex ({correctOptionIndex.Value}) does not match any option's OrderIndex.");
             }
         }
         else
@@ -348,9 +371,9 @@ public class ExerciseService
             }
 
             // Non-MCQ should not have CorrectOptionId
-            if (correctOptionId.HasValue)
+            if (correctOptionIndex.HasValue)
             {
-                errors.Add($"CorrectOptionId is only applicable for MCQ exercises.");
+                errors.Add($"CorrectOptionIndex is only applicable for MCQ exercises.");
             }
         }
 

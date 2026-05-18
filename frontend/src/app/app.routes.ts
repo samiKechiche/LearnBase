@@ -1,3 +1,69 @@
 import { Routes } from '@angular/router';
 
-export const routes: Routes = [];
+export const routes: Routes = [
+  { path: '', redirectTo: 'exercises', pathMatch: 'full' },
+  {
+    path: 'exercises',
+    loadComponent: () =>
+      import('./features/exercises/pages/exercise-list/exercise-list.component').then(
+        (component) => component.ExerciseListComponent,
+      ),
+  },
+  {
+    path: 'exercises/new',
+    loadComponent: () =>
+      import('./features/exercises/pages/exercise-form/exercise-form.component').then(
+        (component) => component.ExerciseFormComponent,
+      ),
+  },
+  {
+    path: 'exercises/:id/edit',
+    loadComponent: () =>
+      import('./features/exercises/pages/exercise-form/exercise-form.component').then(
+        (component) => component.ExerciseFormComponent,
+      ),
+  },
+  {
+    path: 'practice-sets',
+    loadComponent: () =>
+      import('./features/practice/pages/practice-sets/practice-sets.component').then(
+        (component) => component.PracticeSetsComponent,
+      ),
+  },
+  {
+    path: 'practice/start',
+    loadComponent: () =>
+      import('./features/practice/pages/practice-start/practice-start.component').then(
+        (component) => component.PracticeStartComponent,
+      ),
+  },
+  {
+    path: 'practice/session/:id',
+    loadComponent: () =>
+      import('./features/practice/pages/practice-session/practice-session.component').then(
+        (component) => component.PracticeSessionComponent,
+      ),
+  },
+  {
+    path: 'practice/history',
+    loadComponent: () =>
+      import('./features/practice/pages/practice-history/practice-history.component').then(
+        (component) => component.PracticeHistoryComponent,
+      ),
+  },
+  {
+    path: 'practice/history/:id',
+    loadComponent: () =>
+      import('./features/practice/pages/session-detail/session-detail.component').then(
+        (component) => component.SessionDetailComponent,
+      ),
+  },
+  {
+    path: 'practice/results/:id',
+    loadComponent: () =>
+      import('./features/practice/pages/session-detail/session-detail.component').then(
+        (component) => component.SessionDetailComponent,
+      ),
+  },
+  { path: '**', redirectTo: 'exercises' },
+];
