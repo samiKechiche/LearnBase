@@ -12,9 +12,10 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 })
 export class App {
   readonly navLinks = [
-    { label: 'Exercises', path: '/exercises', icon: 'quiz' },
-    { label: 'Practice sets', path: '/practice-sets', icon: 'playlist_play' },
-    { label: 'Start practice', path: '/practice/start', icon: 'play_arrow' },
-    { label: 'History', path: '/practice/history', icon: 'insights' },
-  ];
+  { label: 'Exercises', path: '/exercises', icon: 'quiz' },
+  { label: 'Lessons', path: '/lessons', icon: 'menu_book' }, // ✅ ADD THIS
+  { label: 'Practice sets', path: '/practice-sets', icon: 'playlist_play' },
+  { label: 'Start practice', path: '/practice/start', icon: 'play_arrow' },
+  { label: 'History', path: '/practice/history', icon: 'insights' },
+];
 }

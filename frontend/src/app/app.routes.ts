@@ -2,6 +2,10 @@ import { Routes } from '@angular/router';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'exercises', pathMatch: 'full' },
+
+  // =======================
+  // EXERCISES
+  // =======================
   {
     path: 'exercises',
     loadComponent: () =>
@@ -23,6 +27,35 @@ export const routes: Routes = [
         (component) => component.ExerciseFormComponent,
       ),
   },
+
+  // =======================
+  // LESSONS
+  // =======================
+  {
+    path: 'lessons',
+    loadComponent: () =>
+      import('./features/lessons/pages/lesson-list/lesson-list.component').then(
+        (c) => c.LessonListComponent,
+      ),
+  },
+  {
+    path: 'lessons/new',
+    loadComponent: () =>
+      import('./features/lessons/pages/lesson-form/lesson-form.component').then(
+        (c) => c.LessonFormComponent,
+      ),
+  },
+  {
+    path: 'lessons/:id/edit',
+    loadComponent: () =>
+      import('./features/lessons/pages/lesson-form/lesson-form.component').then(
+        (c) => c.LessonFormComponent,
+      ),
+  },
+
+  // =======================
+  // PRACTICE
+  // =======================
   {
     path: 'practice-sets',
     loadComponent: () =>
@@ -65,5 +98,6 @@ export const routes: Routes = [
         (component) => component.SessionDetailComponent,
       ),
   },
+
   { path: '**', redirectTo: 'exercises' },
 ];
