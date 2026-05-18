@@ -73,6 +73,9 @@ builder.Services.AddScoped<PracticeSessionStatsService>();
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<PasswordHasherService>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<LessonService>();
+builder.Services.AddScoped<NoteService>();
+
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c => {
@@ -110,9 +113,16 @@ builder.Services.AddCors();
 
 var app = builder.Build();
 
+// Auto apply migrations (dev convenience)
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.Migrate();
+}
+
 // CORS - Allow Angular frontend to call the API
 app.UseCors(policy => policy
-    .WithOrigins("http://localhost:4200")  // Angular dev server
+    .WithOrigins("http://localhost:4200")
     .AllowAnyMethod()
     .AllowAnyHeader()
     .AllowCredentials());
@@ -127,7 +137,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
 app.UseHttpsRedirection();
 app.MapControllers();
 
