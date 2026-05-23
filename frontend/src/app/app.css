@@ -1,4 +1,6 @@
 .app-toolbar {
+  align-items: center;
+  display: flex;
   gap: 24px;
   min-height: 64px;
   padding: 0 28px;
@@ -17,6 +19,7 @@
 .main-nav {
   align-items: center;
   display: flex;
+  flex: 1;
   flex-wrap: wrap;
   gap: 4px;
 }
@@ -40,4 +43,8 @@
     height: auto;
     padding: 14px 18px;
   }
+}
+
+.sign-in-button {
+  margin-left: auto;
 }

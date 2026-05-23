@@ -18,4 +18,10 @@ export class App {
   { label: 'Start practice', path: '/practice/start', icon: 'play_arrow' },
   { label: 'History', path: '/practice/history', icon: 'insights' },
 ];
+  readonly loggedIn = !!localStorage.getItem('token');
+
+  logout(): void {
+    localStorage.removeItem('token');
+    location.reload();
+  }
 }
