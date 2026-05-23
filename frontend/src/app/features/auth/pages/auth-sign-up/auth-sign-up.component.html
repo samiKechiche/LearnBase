@@ -39,7 +39,7 @@
             <mat-label>Password</mat-label>
             <input matInput [type]="hide() ? 'password' : 'text'" formControlName="password" />
             <mat-error>Password is required.</mat-error>
-            <button
+            <button type="button"
               matIconButton
               matSuffix
               (click)="clickEvent($event)"
