@@ -16,6 +16,26 @@
         {{ link.label }}
       </a>
     }
+    @if (loggedIn) {
+      <a
+        mat-button
+        (click)="logout()"
+        aria-label="Sign out of LearnBase"
+        class="sign-in-button"
+      >
+        <mat-icon>exit_to_app</mat-icon> Sign Out
+      </a>
+    }
+    @else {
+      <a
+        mat-button
+        routerLink="/login"
+        routerLinkActive="active-link"
+        aria-label="Sign in to LearnBase"
+        class="sign-in-button"
+      ><mat-icon>account_circle</mat-icon> Sign In</a>
+    }
+
   </nav>
 </mat-toolbar>
 

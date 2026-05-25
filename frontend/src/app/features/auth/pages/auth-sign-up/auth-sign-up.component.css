@@ -1,0 +1,19 @@
+mat-form-field {
+  width: 50%;
+  margin-bottom: 16px;
+}
+
+mat-card-actions {
+  margin-left: 16px;
+  margin-top: 16px;
+}
+
+mat-card-subtitle {
+  margin-left: 28px;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+button.login-button {
+  width: 200px;
+}

@@ -99,5 +99,23 @@ export const routes: Routes = [
       ),
   },
 
+  // =======================
+  // AUTH
+  // =======================
+  {
+    path: 'login',
+    loadComponent: () =>
+      import('./features/auth/pages/auth-sign-in/auth-sign-in.component').then(
+        (component) => component.AuthSignInComponent,
+      ),
+  },
+  {
+    path: 'register',
+    loadComponent: () =>
+      import('./features/auth/pages/auth-sign-up/auth-sign-up.component').then(
+        (component) => component.AuthSignUpComponent,
+      ),
+  },
+
   { path: '**', redirectTo: 'exercises' },
 ];

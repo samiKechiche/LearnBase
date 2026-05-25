@@ -3,6 +3,7 @@ using LearnBase.API.DTOs.Auth;
 using LearnBase.API.DTOs.Shared;
 using LearnBase.API.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace LearnBase.API.Services
 {
@@ -51,6 +52,13 @@ namespace LearnBase.API.Services
 
         public async Task<ApiResponseDto<AuthResponseDto>> SaveUserToDatabase(User user)
         {
+            var userWithEmail = await _context.Users
+                .FirstOrDefaultAsync(e => e.Email == user.Email);
+            if (userWithEmail != null)
+            {
+                return ApiResponseDto<AuthResponseDto>.ErrorResponse("User with Email already exists");
+            }
+
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
@@ -63,9 +71,9 @@ namespace LearnBase.API.Services
                 );
         }
 
-        public async Task<ApiResponseDto<AuthResponseDto>> ChangePasswordAsync(ChangePasswordDto changePassword)
+        public async Task<ApiResponseDto<AuthResponseDto>> ChangePasswordAsync(String token, ChangePasswordDto changePassword)
         {
-            var userId = new Guid(_jwtService.GetUserIdFromToken(changePassword.Token));
+            var userId = new Guid(_jwtService.GetUserIdFromToken(token));
 
             if (userId == null)
             {

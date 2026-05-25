@@ -3,6 +3,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { AuthTokenService } from './core/auth/auth-token.service';
 
 @Component({
   selector: 'app-root',
@@ -18,4 +19,11 @@ export class App {
   { label: 'Start practice', path: '/practice/start', icon: 'play_arrow' },
   { label: 'History', path: '/practice/history', icon: 'insights' },
 ];
+  readonly tokenService = new AuthTokenService();
+  readonly loggedIn = !!this.tokenService.getToken();
+
+  logout(): void {
+    this.tokenService.clearToken();
+    location.reload();
+  }
 }
