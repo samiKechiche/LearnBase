@@ -22,7 +22,6 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
     CommonModule,
     ReactiveFormsModule,
     RouterLink,
-    RouterLinkActive,
 
     MatCardModule,
     MatFormFieldModule,
@@ -38,6 +37,7 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 export class AuthSignInComponent {
   loading = false;
   emailErrorMessage = signal('');
+  postErrorMessage = signal('');
 
 
   form = new FormGroup({
@@ -99,7 +99,7 @@ export class AuthSignInComponent {
         location.reload();
       },
       error: (err) => {
-        console.error(err);
+        this.postErrorMessage.set(err.error.message || 'Sign-in failed');
         this.loading = false;
       },
     });

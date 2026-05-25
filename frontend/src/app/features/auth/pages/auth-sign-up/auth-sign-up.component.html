@@ -49,6 +49,10 @@
             <mat-icon>{{hide() ? 'visibility_off' : 'visibility'}}</mat-icon>
             </button>
           </mat-form-field>
+          @if (postErrorMessage())
+          {
+            <mat-error>{{postErrorMessage()}}</mat-error>
+          }
 
         </mat-card-content>
         <mat-card-actions>
