@@ -53,9 +53,10 @@ namespace LearnBase.API.Controllers
 
         [Authorize]
         [HttpPut("/changePassword")]
-        public async Task<ActionResult<ApiResponseDto<AuthResponseDto>>> changePassword([FromBody] ChangePasswordDto changePasswordDto)
+        public async Task<ActionResult<ApiResponseDto<AuthResponseDto>>> changePassword([FromHeader] string authorization, [FromBody] ChangePasswordDto changePasswordDto)
         {
-            var result = await _authService.ChangePasswordAsync(changePasswordDto);
+            var token = authorization.Substring("Bearer ".Length).Trim();
+            var result = await _authService.ChangePasswordAsync(token, changePasswordDto);
 
             if (!result.Success)
             {
