@@ -5,6 +5,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
 import { AuthService } from '../../services/auth.service';
+import { AuthTokenService } from '../../../../core/auth/auth-token.service';
 
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -68,6 +69,7 @@ export class AuthSignUpComponent
     private readonly authService: AuthService,
     private readonly router: Router,
     private readonly route: ActivatedRoute,
+    private readonly tokenService: AuthTokenService
   )
   {
     merge(this.form.get('email')!.statusChanges, this.form.get('email')!.valueChanges)
@@ -76,7 +78,7 @@ export class AuthSignUpComponent
   }
 
   ngOnInit(): void {
-    if (localStorage.getItem('token')) {
+    if (this.tokenService.getToken()) {
       this.router.navigate(['/..'], { relativeTo: this.route });
     }
   }
@@ -97,7 +99,7 @@ export class AuthSignUpComponent
     this.authService.signUp(payload).subscribe({
       next: (res: any) => {
         this.loading = false;
-        localStorage.setItem('token', res.token);
+        this.tokenService.setToken(res.token);
         this.router.navigate(['/..'], { relativeTo: this.route });
         location.reload();
       },
