@@ -9,9 +9,23 @@ using System.Text;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
 using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Http.Features;
 
 var builder = WebApplication.CreateBuilder(args);
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+
+// --- configure multipart/form limits ---
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 100_000_000; // 100 MB example - adjust to your needs
+    // options.ValueLengthLimit = ...
+});
+
+// Configure Kestrel max request body size (global)
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.Limits.MaxRequestBodySize = 100_000_000; // 100 MB example
+});
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
@@ -75,6 +89,7 @@ builder.Services.AddScoped<PasswordHasherService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<LessonService>();
 builder.Services.AddScoped<NoteService>();
+builder.Services.AddScoped<ImportExportService>();
 
 
 builder.Services.AddEndpointsApiExplorer();
@@ -119,6 +134,43 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     db.Database.Migrate();
 }
+
+// Global exception middleware to catch and log early errors
+app.Use(async (context, next) =>
+{
+    try
+    {
+        await next();
+    }
+    catch (Exception ex)
+    {
+        var logger = context.RequestServices.GetService<ILogger<Program>>();
+        logger?.LogError(ex, "Unhandled exception in pipeline");
+        context.Response.StatusCode = 500;
+        await context.Response.WriteAsync("Internal server error");
+    }
+});
+
+// AppDomain / TaskScheduler global handlers to surface crash-causing exceptions to logs
+AppDomain.CurrentDomain.UnhandledException += (s, e) =>
+{
+    try
+    {
+        var logger = app.Services.GetService<ILogger<Program>>();
+        logger?.LogCritical(e.ExceptionObject as Exception, "UnhandledException");
+    }
+    catch { }
+};
+
+TaskScheduler.UnobservedTaskException += (s, e) =>
+{
+    try
+    {
+        var logger = app.Services.GetService<ILogger<Program>>();
+        logger?.LogError(e.Exception, "UnobservedTaskException");
+    }
+    catch { }
+};
 
 // CORS - Allow Angular frontend to call the API
 app.UseCors(policy => policy
