@@ -31,8 +31,10 @@ namespace LearnBase.API.Services
 
             // Create uploads folder if missing
             var uploadsPath = Path.Combine(
-                _environment.ContentRootPath,
-                "uploads");
+    _environment.ContentRootPath,
+    "uploads",
+    "lessons",
+    dto.LessonId.ToString());
 
             if (!Directory.Exists(uploadsPath))
             {
