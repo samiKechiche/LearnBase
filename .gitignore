@@ -57,4 +57,5 @@ npm-debug.log*
 # IDE
 .idea/
 *.swp
-
+# uploads
+backend/LearnBase.API/uploads/

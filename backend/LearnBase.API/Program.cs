@@ -90,6 +90,8 @@ builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<LessonService>();
 builder.Services.AddScoped<NoteService>();
 builder.Services.AddScoped<ImportExportService>();
+builder.Services.AddScoped<FileService>();
+
 
 
 builder.Services.AddEndpointsApiExplorer();

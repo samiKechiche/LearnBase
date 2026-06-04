@@ -1,4 +1,5 @@
 ﻿using LearnBase.API.DTOs.Lesson;
+using LearnBase.API.DTOs.Lessons;
 using LearnBase.API.DTOs.Shared;
 using LearnBase.API.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -9,18 +10,25 @@ namespace LearnBase.API.Controllers
     [Route("api/[controller]")]
     public class LessonsController : ControllerBase
     {
-        private readonly LessonService _service;
+        private readonly LessonService _lessonService;
+        private readonly NoteService _noteService;
+        private readonly FileService _fileService;
 
-        public LessonsController(LessonService service)
+        public LessonsController(
+    LessonService lessonService,
+    NoteService noteService,
+    FileService fileService)
         {
-            _service = service;
+            _lessonService = lessonService;
+            _noteService = noteService;
+            _fileService = fileService;
         }
 
         // CREATE
         [HttpPost]
         public async Task<IActionResult> Create(CreateLessonDto dto)
         {
-            var lesson = await _service.CreateLesson(dto);
+            var lesson = await _lessonService.CreateLesson(dto);
 
             return Ok(ApiResponseDto<LessonResponseDto>
                 .SuccessResponse(lesson, "Lesson created successfully"));
@@ -30,7 +38,7 @@ namespace LearnBase.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetByUser(Guid userId)
         {
-            var lessons = await _service.GetLessonsByUser(userId);
+            var lessons = await _lessonService.GetLessonsByUser(userId);
 
             return Ok(ApiResponseDto<List<LessonResponseDto>>
                 .SuccessResponse(lessons));
@@ -40,7 +48,7 @@ namespace LearnBase.API.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(Guid id)
         {
-            var lesson = await _service.GetLesson(id);
+            var lesson = await _lessonService.GetLesson(id);
 
             if (lesson == null)
             {
@@ -56,7 +64,7 @@ namespace LearnBase.API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, UpdateLessonDto dto)
         {
-            var updated = await _service.UpdateLesson(id, dto);
+            var updated = await _lessonService.UpdateLesson(id, dto);
 
             if (!updated)
             {
@@ -72,7 +80,7 @@ namespace LearnBase.API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var deleted = await _service.DeleteLesson(id);
+            var deleted = await _lessonService.DeleteLesson(id);
 
             if (!deleted)
             {
@@ -82,6 +90,26 @@ namespace LearnBase.API.Controllers
 
             return Ok(ApiResponseDto<string>
                 .SuccessResponse("Deleted", "Lesson deleted successfully"));
+        }
+        [HttpGet("{id}/details")]
+        public async Task<IActionResult> GetLessonDetails(Guid id)
+        {
+            var lesson = await _lessonService.GetByIdAsync(id);
+
+            if (lesson == null)
+                return NotFound();
+
+            var notes = await _noteService.GetByLessonIdAsync(id);
+            var files = await _fileService.GetByLessonIdAsync(id);
+
+            var result = new LessonDetailsDto
+            {
+                Lesson = lesson,
+                Notes = notes,
+                Files = files
+            };
+
+            return Ok(result);
         }
     }
 }
