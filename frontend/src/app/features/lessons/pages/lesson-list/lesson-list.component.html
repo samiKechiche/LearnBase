@@ -21,6 +21,18 @@
     <mat-icon>refresh</mat-icon>
     Refresh
   </button>
+
+  <button mat-stroked-button type="button" (click)="lessonImportInput.click()" [disabled]="importing">
+    <mat-icon>file_upload</mat-icon>
+    {{ importing ? 'Importing...' : 'Import lesson' }}
+  </button>
+  <input
+    #lessonImportInput
+    type="file"
+    hidden
+    accept=".json"
+    (change)="handleLessonImport($event)"
+  />
 </div>
   
   @if (loading) {
@@ -74,6 +86,16 @@
             >
               <mat-icon>edit</mat-icon>
             </a>
+
+            <button
+              mat-icon-button
+              color="primary"
+              type="button"
+              (click)="exportLesson(lesson)"
+              matTooltip="Export"
+            >
+              <mat-icon>download</mat-icon>
+            </button>
 
             <button
               mat-icon-button

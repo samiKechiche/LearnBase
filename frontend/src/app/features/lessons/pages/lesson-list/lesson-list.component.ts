@@ -41,6 +41,8 @@ import { ConfirmDialogComponent } from '../../../../shared/components/confirm-di
 export class LessonListComponent implements OnInit {
   lessons: Lesson[] = [];
   loading = false;
+  importing = false;
+  exportingLessonId: string | null = null;
   searchControl = new FormControl('');
 
   readonly displayedColumns = ['title', 'description', 'updatedAt', 'actions'];
@@ -99,5 +101,55 @@ export class LessonListComponent implements OnInit {
         },
       });
     });
+  }
+
+  exportLesson(lesson: Lesson): void {
+    this.exportingLessonId = lesson.lessonId;
+
+    this.lessonService.exportLesson(lesson.lessonId).subscribe({
+      next: (blob) => {
+        this.exportingLessonId = null;
+        const fileName = `${lesson.title?.replace(/[^a-z0-9_-]/gi, '_') || 'lesson'}-${lesson.lessonId}.json`;
+        this.downloadBlob(blob, fileName);
+      },
+      error: () => {
+        this.exportingLessonId = null;
+        this.snackBar.open('Export failed', 'Close', { duration: 3000 });
+      },
+    });
+  }
+
+  handleLessonImport(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) {
+      return;
+    }
+
+    this.importing = true;
+    this.lessonService.importLesson(file).subscribe({
+      next: () => {
+        this.importing = false;
+        this.snackBar.open('Lesson imported', 'Close', { duration: 3200 });
+        this.loadLessons();
+      },
+      error: (err) => {
+        console.error('Import error:', err);
+        this.importing = false;
+        this.snackBar.open('Import failed', 'Close', { duration: 3000 });
+      },
+    });
+  }
+
+  private downloadBlob(blob: Blob, filename: string): void {
+    const url = window.URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = filename;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    window.URL.revokeObjectURL(url);
   }
 }

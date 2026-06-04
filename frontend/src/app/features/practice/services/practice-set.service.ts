@@ -16,6 +16,7 @@ import {
 @Injectable({ providedIn: 'root' })
 export class PracticeSetService {
   private readonly apiUrl = `${API_BASE_URL}/practicesets`;
+  private readonly importExportUrl = `${API_BASE_URL}/ImportExport`;
 
   constructor(private readonly http: HttpClient) {}
 
@@ -76,6 +77,41 @@ export class PracticeSetService {
     return this.http
       .delete<ApiResponse<boolean>>(`${this.apiUrl}/${practiceSetId}/exercises/${exerciseId}`)
       .pipe(map((response) => this.unwrap(response, false)));
+  }
+
+  exportPracticeSet(practiceSetId: string): Observable<Blob> {
+    return this.http.get(`${this.importExportUrl}/practiceset/${practiceSetId}/export`, {
+      responseType: 'blob' as 'blob',
+    });
+  }
+
+  importPracticeSet(file: File): Observable<PracticeSet> {
+    const payload = new FormData();
+    payload.append('file', file);
+
+    return this.http
+      .post<unknown>(`${this.importExportUrl}/practiceset/import`, payload)
+      .pipe(map((response) => this.parseImportResponse<PracticeSet>(response)));
+  }
+
+  private parseImportResponse<T>(response: unknown): T {
+    if (response && typeof response === 'object') {
+      const apiResponse = response as Partial<ApiResponse<T>>;
+
+      if (typeof apiResponse.success === 'boolean') {
+        if (!apiResponse.success) {
+          throw new Error(apiResponse.errors?.join('\n') || apiResponse.message || 'Request failed');
+        }
+
+        if (apiResponse.data !== undefined) {
+          return apiResponse.data as T;
+        }
+      }
+
+      return response as T;
+    }
+
+    throw new Error('Invalid import response');
   }
 
   generateFromTags(payload: GeneratePracticeSetRequest): Observable<PracticeSet> {

@@ -1,4 +1,4 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 
@@ -9,6 +9,7 @@ import { Lesson, CreateLessonRequest, UpdateLessonRequest } from '../models/less
 @Injectable({ providedIn: 'root' })
 export class LessonService {
   private readonly apiUrl = `${API_BASE_URL}/lessons`;
+  private readonly importExportUrl = `${API_BASE_URL}/ImportExport`;
 
   constructor(private readonly http: HttpClient) {}
 
@@ -16,7 +17,7 @@ export class LessonService {
     let params = new HttpParams();
 
     if (search.trim()) {
-      params = params.set('search', search.trim());
+      params = params.append('search', search.trim());
     }
 
     return this.http
@@ -46,6 +47,41 @@ export class LessonService {
     return this.http
       .delete<ApiResponse<boolean>>(`${this.apiUrl}/${id}`)
       .pipe(map(res => this.unwrap(res, false)));
+  }
+
+  exportLesson(lessonId: string): Observable<Blob> {
+    return this.http.get(`${this.importExportUrl}/lesson/${lessonId}/export`, {
+      responseType: 'blob' as 'blob',
+    });
+  }
+
+  importLesson(file: File): Observable<Lesson> {
+    const payload = new FormData();
+    payload.append('file', file);
+
+    return this.http
+      .post<unknown>(`${this.importExportUrl}/lesson/import`, payload)
+      .pipe(map((response) => this.parseImportResponse<Lesson>(response)));
+  }
+
+  private parseImportResponse<T>(response: unknown): T {
+    if (response && typeof response === 'object') {
+      const apiResponse = response as Partial<ApiResponse<T>>;
+
+      if (typeof apiResponse.success === 'boolean') {
+        if (!apiResponse.success) {
+          throw new Error(apiResponse.errors?.join('\n') || apiResponse.message || 'Request failed');
+        }
+
+        if (apiResponse.data !== undefined) {
+          return apiResponse.data as T;
+        }
+      }
+
+      return response as T;
+    }
+
+    throw new Error('Invalid import response');
   }
 
   private unwrap<T>(response: ApiResponse<T>, fallback?: T): T {

@@ -81,6 +81,8 @@ export class PracticeSetsComponent implements OnInit {
   editingSetId: string | null = null;
   loading = false;
   saving = false;
+  importingPracticeSet = false;
+  exportingPracticeSet = false;
 
   constructor(
     private readonly practiceSetService: PracticeSetService,
@@ -259,6 +261,58 @@ export class PracticeSetsComponent implements OnInit {
         },
         error: (error) => this.showError(error),
       });
+  }
+
+  exportSelectedSet(): void {
+    if (!this.selectedSet) {
+      return;
+    }
+
+    this.exportingPracticeSet = true;
+    this.practiceSetService.exportPracticeSet(this.selectedSet.practiceSetId).subscribe({
+      next: (blob) => {
+        this.exportingPracticeSet = false;
+        const fileName = `${this.selectedSet?.title?.replace(/[^a-z0-9_-]/gi, '_') || 'practice-set'}-${this.selectedSet?.practiceSetId}.json`;
+        this.downloadBlob(blob, fileName);
+      },
+      error: () => {
+        this.exportingPracticeSet = false;
+        this.snackBar.open('Export failed', 'Close', { duration: 3000 });
+      },
+    });
+  }
+
+  handlePracticeSetImport(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) {
+      return;
+    }
+
+    this.importingPracticeSet = true;
+    this.practiceSetService.importPracticeSet(file).subscribe({
+      next: () => {
+        this.importingPracticeSet = false;
+        this.snackBar.open('Practice set imported', 'Close', { duration: 3200 });
+        this.loadPageData();
+      },
+      error: (error) => {
+        this.importingPracticeSet = false;
+        this.showError(error);
+      },
+    });
+  }
+
+  private downloadBlob(blob: Blob, filename: string): void {
+    const url = window.URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = filename;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    window.URL.revokeObjectURL(url);
   }
 
   availableExercises(): Exercise[] {
