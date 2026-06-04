@@ -3,6 +3,8 @@ using LearnBase.API.DTOs.File;
 using LearnBase.API.Models;
 using Microsoft.EntityFrameworkCore;
 
+
+
 namespace LearnBase.API.Services
 {
     public class FileService
@@ -18,6 +20,16 @@ namespace LearnBase.API.Services
             _environment = environment;
         }
 
+        public async Task<List<AppFile>> GetFilesByLesson(Guid lessonId)
+        {
+            return await _context.Files
+                .Where(f => f.LessonId == lessonId)
+                .ToListAsync();
+        }
+        public async Task<AppFile?> GetFileByIdAsync(Guid id)
+        {
+            return await _context.Files.FirstOrDefaultAsync(f => f.FileId == id);
+        }
         public async Task<FileResponseDto> UploadFileAsync(UploadFileDto dto)
         {
             // Check lesson exists
@@ -28,57 +40,64 @@ namespace LearnBase.API.Services
             {
                 throw new Exception("Lesson not found.");
             }
+            var extension = Path.GetExtension(dto.File.FileName).ToLower();
+            
+                // Create uploads folder if missing
+                var uploadsPath = Path.Combine(
+        _environment.ContentRootPath,
+        "uploads",
+        "lessons",
+        dto.LessonId.ToString());
 
-            // Create uploads folder if missing
-            var uploadsPath = Path.Combine(
-    _environment.ContentRootPath,
-    "uploads",
-    "lessons",
-    dto.LessonId.ToString());
+                if (!Directory.Exists(uploadsPath))
+                {
+                    Directory.CreateDirectory(uploadsPath);
+                }
 
-            if (!Directory.Exists(uploadsPath))
-            {
-                Directory.CreateDirectory(uploadsPath);
+                // Generate unique filename
+                var uniqueFileName =
+                    $"{Guid.NewGuid()}_{dto.File.FileName}";
+
+                var filePath = Path.Combine(
+                    uploadsPath,
+                    uniqueFileName);
+
+                // Save physical file
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await dto.File.CopyToAsync(stream);
+                }
+
+                // Create DB record
+                var appFile = new AppFile
+                {
+                    FileId = Guid.NewGuid(),
+                    FileName = dto.File.FileName,
+                    FileType = dto.File.ContentType,
+                    FilePath = filePath,
+                    FileSizeBytes = dto.File.Length,
+                    LessonId = dto.LessonId
+                };
+
+                _context.Files.Add(appFile);
+
+                await _context.SaveChangesAsync();
+
+                return new FileResponseDto
+                {
+                    FileId = appFile.FileId,
+                    FileName = appFile.FileName,
+                    FileType = appFile.FileType,
+                    FileSizeBytes = appFile.FileSizeBytes,
+                    UploadedAt = appFile.UploadedAt,
+                    LessonId = appFile.LessonId
+                };
             }
-
-            // Generate unique filename
-            var uniqueFileName =
-                $"{Guid.NewGuid()}_{dto.File.FileName}";
-
-            var filePath = Path.Combine(
-                uploadsPath,
-                uniqueFileName);
-
-            // Save physical file
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await dto.File.CopyToAsync(stream);
-            }
-
-            // Create DB record
-            var appFile = new AppFile
-            {
-                FileId = Guid.NewGuid(),
-                FileName = dto.File.FileName,
-                FileType = dto.File.ContentType,
-                FilePath = filePath,
-                FileSizeBytes = dto.File.Length,
-                LessonId = dto.LessonId
-            };
-
-            _context.Files.Add(appFile);
-
-            await _context.SaveChangesAsync();
-
-            return new FileResponseDto
-            {
-                FileId = appFile.FileId,
-                FileName = appFile.FileName,
-                FileType = appFile.FileType,
-                FileSizeBytes = appFile.FileSizeBytes,
-                UploadedAt = appFile.UploadedAt,
-                LessonId = appFile.LessonId
-            };
+        public async Task<List<AppFile>> GetByLessonIdAsync(Guid lessonId)
+        {
+            return await _context.Files
+                .Where(f => f.LessonId == lessonId)
+                .ToListAsync();
         }
     }
-}
+    }

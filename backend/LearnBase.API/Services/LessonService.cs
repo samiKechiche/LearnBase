@@ -71,6 +71,11 @@ namespace LearnBase.API.Services
                 CreatedAt = lesson.CreatedAt
             };
         }
+        public async Task<Lesson?> GetByIdAsync(Guid id)
+        {
+            return await _context.Lessons
+                .FirstOrDefaultAsync(l => l.LessonId == id);
+        }
 
         // UPDATE
         public async Task<bool> UpdateLesson(Guid id, UpdateLessonDto dto)
