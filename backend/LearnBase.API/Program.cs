@@ -176,7 +176,7 @@ TaskScheduler.UnobservedTaskException += (s, e) =>
 
 // CORS - Allow Angular frontend to call the API
 app.UseCors(policy => policy
-    .WithOrigins("http://localhost:4200")
+    .WithOrigins("http://localhost:4200", "http://127.0.0.1:4200")
     .AllowAnyMethod()
     .AllowAnyHeader()
     .AllowCredentials());
@@ -191,7 +191,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 app.MapControllers();
 
 app.Run();

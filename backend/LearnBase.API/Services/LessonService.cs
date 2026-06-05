@@ -15,13 +15,13 @@ namespace LearnBase.API.Services
         }
 
         // CREATE
-        public async Task<LessonResponseDto> CreateLesson(CreateLessonDto dto)
+        public async Task<LessonResponseDto> CreateLesson(CreateLessonDto dto, Guid userId)
         {
             var lesson = new Lesson
             {
                 Title = dto.Title,
                 Description = dto.Description,
-                UserId = dto.UserId,
+                UserId = userId,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -35,30 +35,44 @@ namespace LearnBase.API.Services
                 Title = lesson.Title,
                 Description = lesson.Description,
                 UserId = lesson.UserId,
-                CreatedAt = lesson.CreatedAt
-            };
+                    CreatedAt = lesson.CreatedAt,
+                    UpdatedAt = lesson.UpdatedAt
+                };
         }
 
         // GET ALL by user
-        public async Task<List<LessonResponseDto>> GetLessonsByUser(Guid userId)
+        public async Task<List<LessonResponseDto>> GetLessonsByUser(Guid userId, string? search = null)
         {
-            return await _context.Lessons
-                .Where(l => l.UserId == userId)
+            var query = _context.Lessons
+                .Where(l => l.UserId == userId);
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var term = search.Trim();
+                query = query.Where(l =>
+                    l.Title.Contains(term) ||
+                    (l.Description != null && l.Description.Contains(term)));
+            }
+
+            return await query
+                .OrderByDescending(l => l.UpdatedAt)
                 .Select(l => new LessonResponseDto
                 {
                     LessonId = l.LessonId,
                     Title = l.Title,
                     Description = l.Description,
                     UserId = l.UserId,
-                    CreatedAt = l.CreatedAt
+                    CreatedAt = l.CreatedAt,
+                    UpdatedAt = l.UpdatedAt
                 })
                 .ToListAsync();
         }
 
         // GET single
-        public async Task<LessonResponseDto?> GetLesson(Guid id)
+        public async Task<LessonResponseDto?> GetLesson(Guid id, Guid userId)
         {
-            var lesson = await _context.Lessons.FindAsync(id);
+            var lesson = await _context.Lessons
+                .FirstOrDefaultAsync(l => l.LessonId == id && l.UserId == userId);
 
             if (lesson == null) return null;
 
@@ -68,21 +82,24 @@ namespace LearnBase.API.Services
                 Title = lesson.Title,
                 Description = lesson.Description,
                 UserId = lesson.UserId,
-                CreatedAt = lesson.CreatedAt
+                CreatedAt = lesson.CreatedAt,
+                UpdatedAt = lesson.UpdatedAt
             };
         }
-        public async Task<Lesson?> GetByIdAsync(Guid id)
+
+        public async Task<Lesson?> GetByIdAsync(Guid id, Guid userId)
         {
             return await _context.Lessons
-                .FirstOrDefaultAsync(l => l.LessonId == id);
+                .FirstOrDefaultAsync(l => l.LessonId == id && l.UserId == userId);
         }
 
         // UPDATE
-        public async Task<bool> UpdateLesson(Guid id, UpdateLessonDto dto)
+        public async Task<LessonResponseDto?> UpdateLesson(Guid id, UpdateLessonDto dto, Guid userId)
         {
-            var lesson = await _context.Lessons.FindAsync(id);
+            var lesson = await _context.Lessons
+                .FirstOrDefaultAsync(l => l.LessonId == id && l.UserId == userId);
 
-            if (lesson == null) return false;
+            if (lesson == null) return null;
 
             lesson.Title = dto.Title;
             lesson.Description = dto.Description;
@@ -90,13 +107,22 @@ namespace LearnBase.API.Services
 
             await _context.SaveChangesAsync();
 
-            return true;
+            return new LessonResponseDto
+            {
+                LessonId = lesson.LessonId,
+                Title = lesson.Title,
+                Description = lesson.Description,
+                UserId = lesson.UserId,
+                CreatedAt = lesson.CreatedAt,
+                UpdatedAt = lesson.UpdatedAt
+            };
         }
 
         // DELETE
-        public async Task<bool> DeleteLesson(Guid id)
+        public async Task<bool> DeleteLesson(Guid id, Guid userId)
         {
-            var lesson = await _context.Lessons.FindAsync(id);
+            var lesson = await _context.Lessons
+                .FirstOrDefaultAsync(l => l.LessonId == id && l.UserId == userId);
 
             if (lesson == null) return false;
 

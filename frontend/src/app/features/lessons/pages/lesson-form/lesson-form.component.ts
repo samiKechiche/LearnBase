@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 
+import { apiErrorMessage } from '../../../../core/http/api-error';
 import { LessonService } from '../../services/lesson.service';
 
 import { MatCardModule } from '@angular/material/card';
@@ -12,6 +13,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-lesson-form',
@@ -19,6 +21,7 @@ import { MatDividerModule } from '@angular/material/divider';
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    RouterLink,
 
     MatCardModule,
     MatFormFieldModule,
@@ -26,7 +29,8 @@ import { MatDividerModule } from '@angular/material/divider';
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
-    MatDividerModule
+    MatDividerModule,
+    MatSnackBarModule
   ],
   templateUrl: './lesson-form.component.html',
   styleUrl: './lesson-form.component.css',
@@ -41,18 +45,22 @@ export class LessonFormComponent implements OnInit {
   form = new FormGroup({
     title: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     description: new FormControl(''),
-    userId: new FormControl('', { nonNullable: true }), // keep for now
   });
 
   constructor(
     private readonly lessonService: LessonService,
     private readonly router: Router,
     private readonly route: ActivatedRoute,
+    private readonly snackBar: MatSnackBar,
   ) {}
 
   ngOnInit(): void {
     this.lessonId = this.route.snapshot.paramMap.get('id');
     this.isEditMode = !!this.lessonId;
+
+    if (this.lessonId) {
+      this.loadLesson(this.lessonId);
+    }
   }
 
   submit(): void {
@@ -65,18 +73,45 @@ export class LessonFormComponent implements OnInit {
     const payload = {
       title: raw.title,
       description: raw.description || undefined,
-      userId: raw.userId, // ALWAYS present (fixes TS error)
     };
 
-    this.lessonService.createLesson(payload).subscribe({
+    const request = this.lessonId
+      ? this.lessonService.updateLesson(this.lessonId, payload)
+      : this.lessonService.createLesson(payload);
+
+    request.subscribe({
       next: () => {
         this.loading = false;
+        this.snackBar.open('Lesson saved', 'Close', { duration: 2500 });
         this.router.navigate(['/lessons']);
       },
-      error: (err) => {
-        console.error(err);
+      error: (error) => {
+        this.showError(error);
         this.loading = false;
       },
     });
+  }
+
+  private loadLesson(id: string): void {
+    this.loading = true;
+
+    this.lessonService.getLesson(id).subscribe({
+      next: (lesson) => {
+        this.form.patchValue({
+          title: lesson.title,
+          description: lesson.description ?? '',
+        });
+        this.loading = false;
+      },
+      error: (error) => {
+        this.showError(error);
+        this.loading = false;
+      },
+    });
+  }
+
+  private showError(error: unknown): void {
+    const message = apiErrorMessage(error, 'Lesson operation failed.');
+    this.snackBar.open(message, 'Close', { duration: 4500 });
   }
 }

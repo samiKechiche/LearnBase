@@ -2,12 +2,15 @@
 using LearnBase.API.DTOs.Lessons;
 using LearnBase.API.DTOs.Shared;
 using LearnBase.API.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace LearnBase.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class LessonsController : ControllerBase
     {
         private readonly LessonService _lessonService;
@@ -28,7 +31,7 @@ namespace LearnBase.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(CreateLessonDto dto)
         {
-            var lesson = await _lessonService.CreateLesson(dto);
+            var lesson = await _lessonService.CreateLesson(dto, UserId);
 
             return Ok(ApiResponseDto<LessonResponseDto>
                 .SuccessResponse(lesson, "Lesson created successfully"));
@@ -36,9 +39,9 @@ namespace LearnBase.API.Controllers
 
         // GET by user
         [HttpGet]
-        public async Task<IActionResult> GetByUser(Guid userId)
+        public async Task<IActionResult> GetByUser([FromQuery] string? search = null)
         {
-            var lessons = await _lessonService.GetLessonsByUser(userId);
+            var lessons = await _lessonService.GetLessonsByUser(UserId, search);
 
             return Ok(ApiResponseDto<List<LessonResponseDto>>
                 .SuccessResponse(lessons));
@@ -48,7 +51,7 @@ namespace LearnBase.API.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(Guid id)
         {
-            var lesson = await _lessonService.GetLesson(id);
+            var lesson = await _lessonService.GetLesson(id, UserId);
 
             if (lesson == null)
             {
@@ -64,23 +67,23 @@ namespace LearnBase.API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, UpdateLessonDto dto)
         {
-            var updated = await _lessonService.UpdateLesson(id, dto);
+            var updated = await _lessonService.UpdateLesson(id, dto, UserId);
 
-            if (!updated)
+            if (updated == null)
             {
                 return NotFound(ApiResponseDto<string>
                     .ErrorResponse("Lesson not found"));
             }
 
-            return Ok(ApiResponseDto<string>
-                .SuccessResponse("Updated", "Lesson updated successfully"));
+            return Ok(ApiResponseDto<LessonResponseDto>
+                .SuccessResponse(updated, "Lesson updated successfully"));
         }
 
         // DELETE
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var deleted = await _lessonService.DeleteLesson(id);
+            var deleted = await _lessonService.DeleteLesson(id, UserId);
 
             if (!deleted)
             {
@@ -94,7 +97,7 @@ namespace LearnBase.API.Controllers
         [HttpGet("{id}/details")]
         public async Task<IActionResult> GetLessonDetails(Guid id)
         {
-            var lesson = await _lessonService.GetByIdAsync(id);
+            var lesson = await _lessonService.GetByIdAsync(id, UserId);
 
             if (lesson == null)
                 return NotFound();
@@ -110,6 +113,22 @@ namespace LearnBase.API.Controllers
             };
 
             return Ok(result);
+        }
+
+        private Guid UserId
+        {
+            get
+            {
+                var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                               ?? User.FindFirstValue("sub");
+
+                if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+                {
+                    throw new InvalidOperationException("User ID claim not found or invalid in the current request.");
+                }
+
+                return userId;
+            }
         }
     }
 }

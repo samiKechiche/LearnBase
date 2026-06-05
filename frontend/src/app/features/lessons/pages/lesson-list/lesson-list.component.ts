@@ -13,7 +13,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { debounceTime, distinctUntilChanged } from 'rxjs';
 
+import { apiErrorMessage } from '../../../../core/http/api-error';
 import { LessonService } from '../../services/lesson.service';
 import { Lesson } from '../../models/lesson.model';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
@@ -58,19 +60,23 @@ export class LessonListComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadLessons();
+
+    this.searchControl.valueChanges
+      .pipe(debounceTime(250), distinctUntilChanged())
+      .subscribe((search) => this.loadLessons(search ?? ''));
   }
 
-  loadLessons(): void {
+  loadLessons(search = this.searchControl.value ?? ''): void {
     this.loading = true;
 
-    this.lessonService.getLessons().subscribe({
+    this.lessonService.getLessons(search).subscribe({
       next: (data) => {
         this.lessons = data;
         this.loading = false;
       },
-      error: () => {
+      error: (error) => {
         this.loading = false;
-        this.snackBar.open('Failed to load lessons', 'Close', {
+        this.snackBar.open(apiErrorMessage(error, 'Failed to load lessons'), 'Close', {
           duration: 3000,
         });
       },
