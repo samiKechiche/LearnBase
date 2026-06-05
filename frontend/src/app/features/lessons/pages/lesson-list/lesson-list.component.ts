@@ -18,6 +18,8 @@ import { LessonService } from '../../services/lesson.service';
 import { Lesson } from '../../models/lesson.model';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 
+
+
 @Component({
   selector: 'app-lesson-list',
   standalone: true,
@@ -34,6 +36,7 @@ import { ConfirmDialogComponent } from '../../../../shared/components/confirm-di
     MatFormFieldModule,
     MatInputModule,
     ReactiveFormsModule,
+    
   ],
   templateUrl: './lesson-list.component.html',
   styleUrl: './lesson-list.component.css',
