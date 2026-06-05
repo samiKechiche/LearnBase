@@ -15,13 +15,13 @@ namespace LearnBase.API.Services
         }
 
         // CREATE
-        public async Task<LessonResponseDto> CreateLesson(CreateLessonDto dto)
+        public async Task<LessonResponseDto> CreateLesson(CreateLessonDto dto, Guid userId)
         {
             var lesson = new Lesson
             {
                 Title = dto.Title,
                 Description = dto.Description,
-                UserId = dto.UserId,
+                UserId = userId,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };

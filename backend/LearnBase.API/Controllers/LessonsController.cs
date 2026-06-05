@@ -28,16 +28,20 @@ namespace LearnBase.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(CreateLessonDto dto)
         {
-            var lesson = await _lessonService.CreateLesson(dto);
+            var userId = Guid.Parse(User.FindFirst("sub")!.Value);
+
+            var lesson = await _lessonService.CreateLesson(dto, userId);
 
             return Ok(ApiResponseDto<LessonResponseDto>
                 .SuccessResponse(lesson, "Lesson created successfully"));
         }
 
         // GET by user
-        [HttpGet]
-        public async Task<IActionResult> GetByUser(Guid userId)
+        [HttpGet("my")]
+        public async Task<IActionResult> GetMyLessons()
         {
+            var userId = Guid.Parse(User.FindFirst("sub")!.Value);
+
             var lessons = await _lessonService.GetLessonsByUser(userId);
 
             return Ok(ApiResponseDto<List<LessonResponseDto>>

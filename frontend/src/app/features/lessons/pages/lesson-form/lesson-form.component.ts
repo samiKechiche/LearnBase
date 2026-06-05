@@ -39,10 +39,9 @@ export class LessonFormComponent implements OnInit {
   lessonId: string | null = null;
 
   form = new FormGroup({
-    title: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-    description: new FormControl(''),
-    userId: new FormControl('', { nonNullable: true }), // keep for now
-  });
+  title: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+  description: new FormControl(''),
+});
 
   constructor(
     private readonly lessonService: LessonService,
@@ -63,10 +62,9 @@ export class LessonFormComponent implements OnInit {
     const raw = this.form.getRawValue();
 
     const payload = {
-      title: raw.title,
-      description: raw.description || undefined,
-      userId: raw.userId, // ALWAYS present (fixes TS error)
-    };
+  title: raw.title,
+  description: raw.description || undefined
+};
 
     this.lessonService.createLesson(payload).subscribe({
       next: () => {
