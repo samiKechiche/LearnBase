@@ -18,9 +18,9 @@ namespace LearnBase.API.Controllers
         private readonly FileService _fileService;
 
         public LessonsController(
-    LessonService lessonService,
-    NoteService noteService,
-    FileService fileService)
+            LessonService lessonService,
+            NoteService noteService,
+            FileService fileService)
         {
             _lessonService = lessonService;
             _noteService = noteService;
@@ -94,6 +94,8 @@ namespace LearnBase.API.Controllers
             return Ok(ApiResponseDto<string>
                 .SuccessResponse("Deleted", "Lesson deleted successfully"));
         }
+
+        // DETAILS (notes + files)
         [HttpGet("{id}/details")]
         public async Task<IActionResult> GetLessonDetails(Guid id)
         {
@@ -103,7 +105,7 @@ namespace LearnBase.API.Controllers
                 return NotFound();
 
             var notes = await _noteService.GetByLessonIdAsync(id);
-            var files = await _fileService.GetByLessonIdAsync(id);
+            var files = await _fileService.GetFilesByLesson(id);
 
             var result = new LessonDetailsDto
             {
@@ -115,6 +117,9 @@ namespace LearnBase.API.Controllers
             return Ok(result);
         }
 
+        // =========================
+        // USER ID RESOLVER
+        // =========================
         private Guid UserId
         {
             get
@@ -122,9 +127,11 @@ namespace LearnBase.API.Controllers
                 var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier)
                                ?? User.FindFirstValue("sub");
 
-                if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+                if (string.IsNullOrEmpty(userIdClaim) ||
+                    !Guid.TryParse(userIdClaim, out var userId))
                 {
-                    throw new InvalidOperationException("User ID claim not found or invalid in the current request.");
+                    throw new InvalidOperationException(
+                        "User ID claim not found or invalid in the current request.");
                 }
 
                 return userId;

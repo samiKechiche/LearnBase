@@ -21,7 +21,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    RouterLink,
+    
 
     MatCardModule,
     MatFormFieldModule,
@@ -113,5 +113,9 @@ export class LessonFormComponent implements OnInit {
   private showError(error: unknown): void {
     const message = apiErrorMessage(error, 'Lesson operation failed.');
     this.snackBar.open(message, 'Close', { duration: 4500 });
+  }
+
+  goBack(): void {
+    this.router.navigate(['/lessons']);
   }
 }

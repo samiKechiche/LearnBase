@@ -16,3 +16,11 @@ export interface UpdateLessonRequest {
   title: string;
   description?: string;
 }
+export interface AppFile {
+  fileId: string;
+  fileName: string;
+  fileType: string;
+  fileSizeBytes: number;
+  uploadedAt: string;
+  lessonId: string;
+}

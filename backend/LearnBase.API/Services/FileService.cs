@@ -58,12 +58,12 @@ namespace LearnBase.API.Services
                 var uniqueFileName =
                     $"{Guid.NewGuid()}_{dto.File.FileName}";
 
-                var filePath = Path.Combine(
-                    uploadsPath,
-                    uniqueFileName);
+            var relativePath = Path.Combine("uploads", "lessons", dto.LessonId.ToString(), uniqueFileName);
 
-                // Save physical file
-                using (var stream = new FileStream(filePath, FileMode.Create))
+            var physicalPath = Path.Combine(_environment.ContentRootPath,relativePath);
+
+            // Save physical file
+            using (var stream = new FileStream(physicalPath, FileMode.Create))
                 {
                     await dto.File.CopyToAsync(stream);
                 }
@@ -74,7 +74,7 @@ namespace LearnBase.API.Services
                     FileId = Guid.NewGuid(),
                     FileName = dto.File.FileName,
                     FileType = dto.File.ContentType,
-                    FilePath = filePath,
+                    FilePath = relativePath,
                     FileSizeBytes = dto.File.Length,
                     LessonId = dto.LessonId
                 };
@@ -93,11 +93,36 @@ namespace LearnBase.API.Services
                     LessonId = appFile.LessonId
                 };
             }
-        public async Task<List<AppFile>> GetByLessonIdAsync(Guid lessonId)
+        public async Task<bool> DeleteFileAsync(Guid id)
         {
-            return await _context.Files
-                .Where(f => f.LessonId == lessonId)
-                .ToListAsync();
+            var file = await _context.Files.FirstOrDefaultAsync(f => f.FileId == id);
+
+            if (file == null) return false;
+
+            var fullPath = Path.Combine(_environment.ContentRootPath, file.FilePath);
+
+            if (System.IO.File.Exists(fullPath))
+                System.IO.File.Delete(fullPath);
+
+            _context.Files.Remove(file);
+            await _context.SaveChangesAsync();
+
+            return true;
         }
+        public async Task<(byte[] FileBytes, string ContentType, string FileName)?> GetFileForViewAsync(Guid fileId)
+        {
+            var file = await _context.Files.FirstOrDefaultAsync(f => f.FileId == fileId);
+
+            if (file == null)
+                return null;
+
+            if (!System.IO.File.Exists(file.FilePath))
+                return null;
+
+            var bytes = await System.IO.File.ReadAllBytesAsync(file.FilePath);
+
+            return (bytes, file.FileType, file.FileName);
+        }
+
     }
     }
