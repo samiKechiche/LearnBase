@@ -53,11 +53,47 @@ namespace LearnBase.API.Controllers
                 return BadRequest(ex.Message);
             }
         }
-        [HttpGet]
+        [HttpGet("lesson/{lessonId}")]
         public async Task<IActionResult> GetFilesByLesson(Guid lessonId)
         {
             var files = await _fileService.GetFilesByLesson(lessonId);
-            return Ok(files);
+
+            var result = files.Select(f => new FileResponseDto
+            {
+                FileId = f.FileId,
+                FileName = f.FileName,
+                FileType = f.FileType,
+                FileSizeBytes = f.FileSizeBytes,
+                UploadedAt = f.UploadedAt,
+                LessonId = f.LessonId
+            });
+
+            return Ok(result);
+        }
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            var deleted = await _fileService.DeleteFileAsync(id);
+
+            if (!deleted)
+                return NotFound("File not found");
+
+            return Ok();
+        }
+        [HttpGet("view/{fileId}")]
+        public async Task<IActionResult> ViewFile(Guid fileId)
+        {
+            Console.WriteLine("VIEW FILE ID: " + fileId);
+
+            var result = await _fileService.GetFileForViewAsync(fileId);
+
+            if (result == null)
+            {
+                Console.WriteLine("FILE NOT FOUND IN SERVICE");
+                return NotFound();
+            }
+
+            return File(result.Value.FileBytes, result.Value.ContentType);
         }
         [HttpGet("download/{id}")]
         public async Task<IActionResult> Download(Guid id)

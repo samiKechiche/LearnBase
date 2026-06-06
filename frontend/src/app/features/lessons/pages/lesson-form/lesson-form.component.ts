@@ -77,4 +77,7 @@ export class LessonFormComponent implements OnInit {
       },
     });
   }
+  goBack(): void {
+  this.router.navigate(['/lessons']);
+}
 }

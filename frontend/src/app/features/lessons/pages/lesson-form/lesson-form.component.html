@@ -5,10 +5,11 @@
       <h1>{{ isEditMode ? 'Edit lesson' : 'New lesson' }}</h1>
     </div>
 
-    <a mat-stroked-button routerLink="/lessons">
+    <button mat-stroked-button type="button" (click)="goBack()">
       <mat-icon>arrow_back</mat-icon>
       Back
-    </a>
+      </button>
+    
   </div>
 
   @if (loading) {
@@ -36,7 +37,9 @@
         </mat-card-content>
 
         <mat-card-actions align="end">
-          <a mat-button routerLink="/lessons">Cancel</a>
+          <button mat-button type="button" (click)="goBack()">
+            Cancel
+            </button>
 
           <button mat-flat-button color="primary" type="submit" [disabled]="loading">
             @if (loading) {

@@ -48,6 +48,9 @@ export class LessonService {
       .delete<ApiResponse<boolean>>(`${this.apiUrl}/${id}`)
       .pipe(map(res => this.unwrap(res, false)));
   }
+  getLessonDetails(id: string) {
+  return this.http.get<any>(`${this.apiUrl}/${id}/details`);
+}
 
   exportLesson(lessonId: string): Observable<Blob> {
     return this.http.get(`${this.importExportUrl}/lesson/${lessonId}/export`, {
@@ -83,6 +86,28 @@ export class LessonService {
 
     throw new Error('Invalid import response');
   }
+  uploadFile(lessonId: string, file: File) {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('lessonId', lessonId);
+
+  return this.http.post(`${API_BASE_URL}/files/upload`, formData);
+}
+
+downloadFile(fileId: string) {
+  return this.http.get(
+    `${API_BASE_URL}/files/download/${fileId}`,
+    {
+      responseType: 'blob'
+    }
+  );
+}
+getFileViewUrl(file: any): string {
+  return `${API_BASE_URL}/files/view/${file.fileId}`;
+}
+deleteFile(fileId: string) {
+  return this.http.delete(`${API_BASE_URL}/files/${fileId}`);
+}
 
   private unwrap<T>(response: ApiResponse<T>, fallback?: T): T {
     if (!response.success) {

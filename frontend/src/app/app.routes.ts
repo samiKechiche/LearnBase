@@ -52,6 +52,24 @@ export const routes: Routes = [
         (c) => c.LessonFormComponent,
       ),
   },
+  {
+  path: 'lessons/:id/notes/new',
+  loadComponent: () =>
+    import('./features/notes/components/note-editor/note-editor.component')
+      .then(m => m.NoteEditorComponent)
+},
+  {
+  path: 'lessons/:id',
+  loadComponent: () =>
+    import('./features/lessons/pages/lesson-details/lesson-details.component')
+      .then(m => m.LessonDetailsComponent)
+  },
+  {
+  path: 'lessons/:id/notes/:noteId/edit',
+  loadComponent: () =>
+    import('./features/notes/components/note-editor/note-editor.component')
+      .then(m => m.NoteEditorComponent)
+},
 
   // =======================
   // PRACTICE

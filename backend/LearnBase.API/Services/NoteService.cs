@@ -1,10 +1,12 @@
-﻿using LearnBase.API.Data;
+﻿using DocumentFormat.OpenXml.Packaging;
+using LearnBase.API.Data;
 using LearnBase.API.DTOs.Note;
 using LearnBase.API.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
-
+using OpenXmlPowerTools;
 using DocumentFormat.OpenXml.Packaging;
+using System;
+using System.IO;
 
 namespace LearnBase.API.Services
 {
@@ -41,17 +43,34 @@ namespace LearnBase.API.Services
         // CREATE FROM FILE
         public async Task<Note> CreateFromDocxAsync(IFormFile file, Guid lessonId)
         {
-            string text;
+            string html;
 
             using (var stream = file.OpenReadStream())
-            using (var doc = WordprocessingDocument.Open(stream, false))
+            using (var memory = new MemoryStream())
             {
-                text = doc.MainDocumentPart?.Document?.Body?.InnerText ?? "";
+                await stream.CopyToAsync(memory);
+                memory.Position = 0;
+
+                using (var wordDoc = WordprocessingDocument.Open(memory, false))
+                {
+                    var settings = new HtmlConverterSettings()
+                    {
+                        PageTitle = "Converted Document"
+                    };
+
+                    var htmlElement = HtmlConverter.ConvertToHtml(wordDoc, settings);
+
+                    using (var writer = new System.IO.StringWriter())
+                    {
+                        html = htmlElement.ToString();
+                        html = writer.ToString();
+                    }
+                }
             }
 
             var note = new Note
             {
-                Content = text,
+                Content = html,
                 LessonId = lessonId
             };
 
