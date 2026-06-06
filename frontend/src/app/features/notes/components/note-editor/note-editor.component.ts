@@ -32,6 +32,7 @@ export class NoteEditorComponent implements AfterViewInit, OnDestroy {
 
   lessonId!: string;
   quill!: Quill;
+  private pendingContent: string | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -74,6 +75,11 @@ export class NoteEditorComponent implements AfterViewInit, OnDestroy {
 },
       placeholder: 'Write your note here...'
     });
+
+    if (this.pendingContent !== null) {
+      this.quill.root.innerHTML = this.pendingContent;
+      this.pendingContent = null;
+    }
   }
 
   save(): void {
@@ -89,7 +95,13 @@ export class NoteEditorComponent implements AfterViewInit, OnDestroy {
 }
   loadNote(): void {
   this.noteService.getNote(this.noteId!).subscribe(res => {
-    this.quill.root.innerHTML = res.data.content;
+    const content = res.data.content;
+    if (this.quill) {
+      this.quill.root.innerHTML = content;
+      return;
+    }
+
+    this.pendingContent = content;
   });
 }
   ngOnDestroy(): void {

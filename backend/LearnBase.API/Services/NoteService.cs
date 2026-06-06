@@ -60,11 +60,7 @@ namespace LearnBase.API.Services
 
                     var htmlElement = HtmlConverter.ConvertToHtml(wordDoc, settings);
 
-                    using (var writer = new System.IO.StringWriter())
-                    {
-                        html = htmlElement.ToString();
-                        html = writer.ToString();
-                    }
+                    html = htmlElement.ToString();
                 }
             }
 

@@ -116,10 +116,12 @@ namespace LearnBase.API.Services
             if (file == null)
                 return null;
 
-            if (!System.IO.File.Exists(file.FilePath))
+            var fullPath = Path.Combine(_environment.ContentRootPath, file.FilePath);
+
+            if (!System.IO.File.Exists(fullPath))
                 return null;
 
-            var bytes = await System.IO.File.ReadAllBytesAsync(file.FilePath);
+            var bytes = await System.IO.File.ReadAllBytesAsync(fullPath);
 
             return (bytes, file.FileType, file.FileName);
         }
