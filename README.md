@@ -3,61 +3,9 @@
 > A full‑stack Learning Management & Practice Platform. Create organized lessons, build exercises in multiple formats, run active‑recall practice sessions, and track your performance — all in one place.
 
 <p align="center">
-  <video src="assets/videos/LearnBase%20Video%20Demonstration.mp4" controls width="90%"></video>
-</p>
-
----
-
-## 📸 Screenshots
-
-<p align="center">
-  <img src="assets/screenshots/Log%20in.png" width="80%" alt="Authentication" />
-  <br/><em>Authentication</em>
-</p>
-
-<p align="center">
-  <img src="assets/screenshots/Lesson%20List.png" width="80%" alt="Lesson List" />
-  <br/><em>Lesson List</em>
-</p>
-
-<p align="center">
-  <img src="assets/screenshots/Lesson%20Details.png" width="80%" alt="Lesson Details" />
-  <br/><em>Lesson Details</em>
-</p>
-
-<p align="center">
-  <img src="assets/screenshots/Note%20Creation.png" width="80%" alt="Note Creation" />
-  <br/><em>Note Creation</em>
-</p>
-
-<p align="center">
-  <img src="assets/screenshots/Exercise%20List.png" width="80%" alt="Exercise List" />
-  <br/><em>Exercise List</em>
-</p>
-
-<p align="center">
-  <img src="assets/screenshots/Practice%20Set%20Creation%20%26%20List%20interface.png" width="80%" alt="Practice Sets" />
-  <br/><em>Practice Sets</em>
-</p>
-
-<p align="center">
-  <img src="assets/screenshots/Start%20Practice%20Session.png" width="80%" alt="Start Practice Session" />
-  <br/><em>Start Practice Session</em>
-</p>
-
-<p align="center">
-  <img src="assets/screenshots/Practice%20Session%20-%20Answer%20MCQ%20Exercise.png" width="80%" alt="Practice Session — MCQ" />
-  <br/><em>Practice Session — MCQ</em>
-</p>
-
-<p align="center">
-  <img src="assets/screenshots/Practice%20Session%20History%20List.png" width="80%" alt="Session History" />
-  <br/><em>Session History</em>
-</p>
-
-<p align="center">
-  <img src="assets/screenshots/Swagger%20UI.png" width="80%" alt="Swagger API Documentation" />
-  <br/><em>Swagger API Documentation</em>
+  <video src="https://github.com/samiKechiche/LearnBase/raw/dev/assets/videos/LearnBase%20Video%20Demonstration.mp4" controls width="90%"></video>
+  <br/>
+  <em>▶️ Full platform walkthrough (~4 min)</em>
 </p>
 
 ---
@@ -73,6 +21,63 @@
 | **Performance History** | Detailed session summaries with score percentages, per‑question breakdowns, and historical trends. | Sami |
 | **Data Portability** | Full export/import system using JSON — back up individual items or your complete dataset. | Saifeddine |
 | **Secure Authentication** | JWT‑based auth with secure password hashing and protected API endpoints. | Saifeddine |
+
+---
+
+## 📸 Screenshots
+
+<table align="center">
+  <tr>
+    <td align="center" width="50%">
+      <img src="assets/screenshots/Log%20in.png" width="100%" alt="Authentication" />
+      <br/><sub>Authentication</sub>
+    </td>
+    <td align="center" width="50%">
+      <img src="assets/screenshots/Lesson%20List.png" width="100%" alt="Lesson List" />
+      <br/><sub>Lesson List</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <img src="assets/screenshots/Lesson%20Details.png" width="100%" alt="Lesson Details" />
+      <br/><sub>Lesson Details</sub>
+    </td>
+    <td align="center" width="50%">
+      <img src="assets/screenshots/Note%20Creation.png" width="100%" alt="Note Creation" />
+      <br/><sub>Note Creation</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <img src="assets/screenshots/Exercise%20List.png" width="100%" alt="Exercise List" />
+      <br/><sub>Exercise List</sub>
+    </td>
+    <td align="center" width="50%">
+      <img src="assets/screenshots/Practice%20Set%20Creation%20%26%20List%20interface.png" width="100%" alt="Practice Sets" />
+      <br/><sub>Practice Sets</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <img src="assets/screenshots/Start%20Practice%20Session.png" width="100%" alt="Start Practice Session" />
+      <br/><sub>Start Practice Session</sub>
+    </td>
+    <td align="center" width="50%">
+      <img src="assets/screenshots/Practice%20Session%20-%20Answer%20MCQ%20Exercise.png" width="100%" alt="Practice Session — MCQ" />
+      <br/><sub>Practice Session — MCQ</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <img src="assets/screenshots/Practice%20Session%20History%20List.png" width="100%" alt="Session History" />
+      <br/><sub>Session History</sub>
+    </td>
+    <td align="center" width="50%">
+      <img src="assets/screenshots/Swagger%20UI.png" width="100%" alt="Swagger API Documentation" />
+      <br/><sub>Swagger API Documentation</sub>
+    </td>
+  </tr>
+</table>
 
 ---
 
