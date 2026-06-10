@@ -3,7 +3,7 @@
 > A full‑stack Learning Management & Practice Platform. Create organized lessons, build exercises in multiple formats, run active‑recall practice sessions, and track your performance — all in one place.
 
 <p align="center">
-  <video src="https://github.com/samiKechiche/LearnBase/raw/dev/assets/videos/LearnBase%20Video%20Demonstration.mp4" controls width="90%"></video>
+  <video src="https://github.com/user-attachments/assets/be5aa0e2-0fec-4a23-b89f-c018cb83a7ac" controls width="90%"></video>
   <br/>
   <em>▶️ Full platform walkthrough (~4 min)</em>
 </p>
