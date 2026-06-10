@@ -1,0 +1,20 @@
+/* Quill Snow Theme (manual fix) */
+
+.ql-toolbar {
+  border: 1px solid #ccc;
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+  background: #fff;
+}
+
+.ql-container {
+  border: 1px solid #ccc;
+  border-radius: 0 0 6px 6px;
+  font-size: 14px;
+  background: white;
+  min-height: 250px;
+}
+
+.ql-editor {
+  min-height: 250px;
+}

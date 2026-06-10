@@ -1,0 +1,40 @@
+.form-layout {
+  max-width: 860px;
+}
+
+.form-card,
+.tag-area {
+  display: grid;
+  gap: 18px;
+}
+
+.section-heading,
+.new-tag-row,
+.option-row {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+}
+
+.section-heading {
+  justify-content: space-between;
+}
+
+.section-heading h2 {
+  font-size: 18px;
+  margin: 0;
+}
+
+.option-panel,
+.options-list {
+  display: grid;
+  gap: 12px;
+}
+
+.option-row mat-form-field {
+  flex: 1;
+}
+
+.new-tag-row mat-form-field {
+  flex: 1;
+}

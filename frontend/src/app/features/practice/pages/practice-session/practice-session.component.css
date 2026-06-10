@@ -1,0 +1,58 @@
+.session-layout,
+.question-card,
+.answer-list,
+.flashcard-actions,
+.result-feedback {
+  display: grid;
+  gap: 16px;
+}
+
+.progress-card {
+  display: grid;
+  gap: 12px;
+}
+
+.progress-meta,
+.mini-stats,
+.question-topline,
+.button-row {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.mini-stats {
+  color: #6b7280;
+  justify-content: flex-start;
+}
+
+.correct {
+  color: #047857;
+}
+
+.incorrect {
+  color: #b91c1c;
+}
+
+.question-card h2 {
+  font-size: 24px;
+  line-height: 1.35;
+  margin: 0;
+}
+
+.status-chip {
+  background: #dcfce7;
+  border-radius: 999px;
+  color: #166534;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+}
+
+.answer-reveal {
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+}

@@ -45,11 +45,21 @@ public class ApplicationDbContext : DbContext
         // COMPOSITE KEYS (Junction Tables)
         // ═══════════════════════════════════════════════════════════
 
+        //modelBuilder.Entity<ExerciseTag>()
+        //    .HasKey(et => new { et.ExerciseId, et.TagId });
+
+        //modelBuilder.Entity<PracticeSetExercise>()
+        //    .HasKey(pse => new { pse.PracticeSetId, pse.ExerciseId });
+        // ADD unique indexes instead:
         modelBuilder.Entity<ExerciseTag>()
-            .HasKey(et => new { et.ExerciseId, et.TagId });
+            .HasIndex(et => new { et.ExerciseId, et.TagId })
+            .IsUnique()
+            .HasDatabaseName("IX_ExerciseTag_ExerciseId_TagId_Unique");
 
         modelBuilder.Entity<PracticeSetExercise>()
-            .HasKey(pse => new { pse.PracticeSetId, pse.ExerciseId });
+            .HasIndex(pse => new { pse.PracticeSetId, pse.ExerciseId })
+            .IsUnique()
+            .HasDatabaseName("IX_PracticeSetExercise_SetId_ExerciseId_Unique");
 
         // ═══════════════════════════════════════════════════════════
         // UNIQUE CONSTRAINTS

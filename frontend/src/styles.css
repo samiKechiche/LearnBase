@@ -1,1 +1,129 @@
-/* You can add global styles to this file, and also import other style files */
+@import '@angular/material/prebuilt-themes/azure-blue.css';
+@import "quill/dist/quill.snow.css";
+@import "quill/dist/quill.core.css";
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: #f5f7fb;
+  color: #111827;
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.page-shell {
+  margin: 0 auto;
+  max-width: 1180px;
+  padding: 32px 24px 48px;
+}
+
+.narrow-page {
+  max-width: 760px;
+}
+
+.page-header,
+.toolbar-row {
+  align-items: center;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+
+.page-header h1 {
+  font-size: 34px;
+  line-height: 1.1;
+  margin: 0;
+}
+
+.eyebrow {
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  margin: 0 0 6px;
+  text-transform: uppercase;
+}
+
+.toolbar-row {
+  justify-content: flex-start;
+}
+
+.table-shell {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: auto;
+}
+
+.table-shell table {
+  width: 100%;
+}
+
+.loading-state,
+.empty-state {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  display: grid;
+  gap: 14px;
+  justify-items: center;
+  min-height: 220px;
+  padding: 32px;
+  text-align: center;
+}
+
+.empty-state.compact {
+  min-height: 130px;
+  padding: 22px;
+}
+
+.empty-state mat-icon {
+  color: #2563eb;
+  font-size: 42px;
+  height: 42px;
+  width: 42px;
+}
+
+.empty-state h2 {
+  font-size: 20px;
+  margin: 0;
+}
+
+.muted {
+  color: #6b7280;
+}
+
+.form-actions {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+mat-card {
+  border-radius: 8px !important;
+}
+
+@media (max-width: 760px) {
+  .page-shell {
+    padding: 24px 16px 36px;
+  }
+
+  .page-header,
+  .toolbar-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

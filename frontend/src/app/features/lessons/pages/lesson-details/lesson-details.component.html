@@ -1,0 +1,180 @@
+<section class="page-shell">
+
+  <!-- HEADER -->
+  <div class="page-header">
+    <div>
+      <p class="eyebrow">Lesson</p>
+      <h1 *ngIf="lesson">{{ lesson.title }}</h1>
+    </div>
+
+    <a mat-stroked-button routerLink="/lessons">
+      <mat-icon>arrow_back</mat-icon>
+      Back
+    </a>
+  </div>
+
+  <!-- LOADING -->
+  <div *ngIf="loading" class="loading-state">
+    <mat-spinner diameter="36"></mat-spinner>
+  </div>
+
+  <!-- CONTENT -->
+  <div *ngIf="!loading && lesson">
+
+    <!-- LESSON INFO -->
+    <mat-card>
+      <mat-card-content>
+        <p><strong>Description:</strong></p>
+        <p>{{ lesson.description || 'No description' }}</p>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-divider></mat-divider>
+
+  <!-- NOTES -->
+<mat-card style="margin-top: 16px;">
+  <mat-card-content>
+
+    <div class="notes-header"
+         style="display: flex; justify-content: space-between; align-items: center;">
+      <h2>Notes</h2>
+
+      <!-- GO TO QUILL EDITOR -->
+      <button
+        mat-flat-button
+        color="primary"
+        [routerLink]="['/lessons', lessonId, 'notes', 'new']"
+      >
+        Add Note
+      </button>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <!-- EMPTY STATE -->
+    <div *ngIf="notes.length === 0" style="margin-top: 12px;">
+      No notes yet.
+    </div>
+
+    <!-- NOTES GRID -->
+<div class="notes-grid">
+
+  <div *ngFor="let note of notes"
+       class="note-item">
+
+    <!-- NOTE CONTENT (Quill HTML) -->
+    <div class="note-content">
+      {{ getPreview(note.content) }}
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="note-actions">
+
+      <button mat-icon-button color="primary"
+              (click)="editNote(note.noteId)"
+              matTooltip="Edit note">
+        <mat-icon>edit</mat-icon>
+      </button>
+
+      <button mat-icon-button color="warn"
+              (click)="deleteNote(note.noteId)"
+              matTooltip="Delete note">
+        <mat-icon>delete</mat-icon>
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+  </mat-card-content>
+</mat-card>
+
+    <!-- FILES -->
+<mat-card style="margin-top: 16px;">
+  <mat-card-content>
+
+    <!-- HEADER -->
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
+      <h2 style="margin: 0;">Files</h2>
+
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="fileInput.click()">
+        <mat-icon>upload</mat-icon>
+        Upload File
+      </button>
+
+      <input
+        #fileInput
+        type="file"
+        hidden
+        (change)="uploadFile($event)">
+    </div>
+
+    <!-- EMPTY STATE -->
+    <div *ngIf="files.length === 0" style="opacity: 0.7;">
+      No files yet.
+    </div>
+
+    <!-- GRID -->
+    <div style="
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    ">
+
+      <div *ngFor="let file of files"
+           style="
+             flex: 0 1 220px;
+             padding: 12px;
+             border: 1px solid #eee;
+             border-radius: 10px;
+             background: #fff;
+             display: flex;
+             justify-content: space-between;
+             align-items: center;
+           ">
+
+        <!-- FILE NAME -->
+        <span style="
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          max-width: 140px;
+        ">
+          {{ file.fileName }}
+        </span>
+
+        <!-- ACTIONS -->
+        <div style="display: flex; gap: 6px;">
+
+          <button mat-icon-button color="primary"
+                  (click)="downloadFile(file)"
+                  matTooltip="Download">
+            <mat-icon>download</mat-icon>
+          </button>
+
+          <button mat-icon-button color="warn"
+                  (click)="deleteFile(file)"
+                  matTooltip="Delete">
+            <mat-icon>delete</mat-icon>
+          </button>
+          <button mat-icon-button color="warn"
+                  (click)="openFile(file)"
+                  matTooltip="View">
+            <mat-icon>visibility</mat-icon>
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </mat-card-content>
+</mat-card>
+  </div>
+</section>

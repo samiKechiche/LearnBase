@@ -1,0 +1,29 @@
+<section class="page-shell">
+
+  <div class="page-header">
+    <h1>Create Note</h1>
+
+    <button mat-stroked-button [routerLink]="['/lessons', lessonId]">
+      Back
+    </button>
+  </div>
+
+  <mat-card>
+    <mat-card-content>
+
+      <!-- Quill container -->
+      <div id="editor" style="height: 300px;"></div>
+
+      <button
+        mat-flat-button
+        color="primary"
+        (click)="save()"
+        style="margin-top: 16px;"
+      >
+        Save Note
+      </button>
+
+    </mat-card-content>
+  </mat-card>
+
+</section>

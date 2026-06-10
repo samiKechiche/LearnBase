@@ -1,0 +1,230 @@
+<section class="page-shell">
+  <div class="page-header">
+    <div>
+      <p class="eyebrow">Practice Sessions</p>
+      <h1>Practice sets</h1>
+    </div>
+
+    <button mat-flat-button type="button" (click)="practiceSetImportInput.click()" [disabled]="importingPracticeSet">
+      <mat-icon>file_upload</mat-icon>
+      {{ importingPracticeSet ? 'Importing...' : 'Import set' }}
+    </button>
+    <input
+      #practiceSetImportInput
+      type="file"
+      hidden
+      accept=".json"
+      (change)="handlePracticeSetImport($event)"
+    />
+
+    <a mat-flat-button color="primary" routerLink="/practice/start">
+      <mat-icon>play_arrow</mat-icon>
+      Start practice
+    </a>
+  </div>
+
+  @if (loading) {
+    <div class="loading-state">
+      <mat-spinner diameter="36"></mat-spinner>
+    </div>
+  } @else {
+    <div class="split-layout">
+      <div class="stack">
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>{{ editingSetId ? 'Edit set' : 'New set' }}</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <form class="compact-form" [formGroup]="setForm" (ngSubmit)="saveSet()">
+              <mat-form-field appearance="outline">
+                <mat-label>Title</mat-label>
+                <input matInput formControlName="title" />
+                <mat-error>Title is required.</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Description</mat-label>
+                <textarea matInput rows="3" formControlName="description"></textarea>
+              </mat-form-field>
+
+              <div class="form-actions">
+                @if (editingSetId) {
+                  <button mat-button type="button" (click)="cancelEdit()">Cancel</button>
+                }
+                <button mat-flat-button color="primary" type="submit" [disabled]="saving">
+                  <mat-icon>save</mat-icon>
+                  Save set
+                </button>
+              </div>
+            </form>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Generate from tags</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <form class="compact-form" [formGroup]="generateForm" (ngSubmit)="generateFromTags()">
+              <mat-form-field appearance="outline">
+                <mat-label>Title</mat-label>
+                <input matInput formControlName="title" />
+                <mat-error>Title is required.</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Description</mat-label>
+                <textarea matInput rows="2" formControlName="description"></textarea>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Tags</mat-label>
+                <mat-select formControlName="tagIds" multiple>
+                  @for (tag of tags; track tag.tagId) {
+                    <mat-option [value]="tag.tagId">{{ tag.name }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+
+              <div class="form-actions">
+                <button mat-stroked-button type="submit">
+                  <mat-icon>auto_awesome</mat-icon>
+                  Generate
+                </button>
+              </div>
+            </form>
+          </mat-card-content>
+        </mat-card>
+
+        <div class="set-list">
+          @for (practiceSet of practiceSets; track practiceSet.practiceSetId) {
+            <button
+              class="set-list-item"
+              type="button"
+              [class.active]="practiceSet.practiceSetId === selectedSet?.practiceSetId"
+              (click)="selectSet(practiceSet)"
+            >
+              <span>
+                <strong>{{ practiceSet.title }}</strong>
+                <small
+                  >{{ practiceSet.exerciseCount }} exercises &middot;
+                  {{ practiceSet.sessionCount }} sessions</small
+                >
+              </span>
+              <mat-icon>chevron_right</mat-icon>
+            </button>
+          } @empty {
+            <div class="empty-state compact">
+              <mat-icon>playlist_add</mat-icon>
+              <h2>No practice sets</h2>
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="stack">
+        @if (selectedSet) {
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title>{{ selectedSet.title }}</mat-card-title>
+              <mat-card-subtitle>{{ selectedSet.exerciseCount }} exercises</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content class="detail-stack">
+              @if (selectedSet.description) {
+                <p class="muted">{{ selectedSet.description }}</p>
+              }
+
+              <div class="set-actions">
+                <button mat-stroked-button type="button" (click)="startEdit(selectedSet)">
+                  <mat-icon>edit</mat-icon>
+                  Edit
+                </button>
+                <button
+                  mat-stroked-button
+                  type="button"
+                  color="primary"
+                  (click)="exportSelectedSet()"
+                  [disabled]="exportingPracticeSet"
+                >
+                  <mat-icon>download</mat-icon>
+                  {{ exportingPracticeSet ? 'Exporting...' : 'Export' }}
+                </button>
+                <button
+                  mat-stroked-button
+                  color="warn"
+                  type="button"
+                  (click)="deleteSet(selectedSet)"
+                  [matTooltip]="
+                    canDeleteSet(selectedSet) ? 'Delete' : 'Delete session history first'
+                  "
+                >
+                  <mat-icon>delete</mat-icon>
+                  Delete
+                </button>
+              </div>
+
+              <mat-divider></mat-divider>
+
+              <div class="add-exercise-row">
+                <mat-form-field appearance="outline">
+                  <mat-label>Add exercise</mat-label>
+                  <mat-select [formControl]="selectedExerciseControl">
+                    @for (exercise of availableExercises(); track exercise.exerciseId) {
+                      <mat-option [value]="exercise.exerciseId">
+                        {{ exercise.question }}
+                      </mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+
+                <button
+                  mat-flat-button
+                  color="primary"
+                  type="button"
+                  (click)="addExercise()"
+                  [disabled]="!selectedExerciseControl.value || availableExercises().length === 0"
+                >
+                  <mat-icon>add</mat-icon>
+                  Add
+                </button>
+              </div>
+
+              <div class="exercise-stack">
+                @if (availableExercises().length === 0 && exercises.length > 0) {
+                  <p class="muted">All available exercises are already in this set.</p>
+                }
+
+                @for (exercise of selectedSet.exercises ?? []; track exercise.exerciseId) {
+                  <div class="exercise-row">
+                    <span>
+                      <strong>{{ exercise.question }}</strong>
+                      <small>{{ exerciseTypeLabel(exercise.type) }}</small>
+                    </span>
+                    <button
+                      mat-icon-button
+                      color="warn"
+                      type="button"
+                      (click)="removeExercise(exercise)"
+                    >
+                      <mat-icon>remove_circle</mat-icon>
+                    </button>
+                  </div>
+                } @empty {
+                  <div class="empty-state compact">
+                    <mat-icon>quiz</mat-icon>
+                    <h2>No exercises in this set</h2>
+                  </div>
+                }
+              </div>
+            </mat-card-content>
+          </mat-card>
+        } @else {
+          <div class="empty-state">
+            <mat-icon>playlist_play</mat-icon>
+            <h2>Select a practice set</h2>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</section>

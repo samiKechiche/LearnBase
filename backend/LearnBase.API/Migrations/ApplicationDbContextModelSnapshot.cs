@@ -115,19 +115,23 @@ namespace LearnBase.API.Migrations
 
             modelBuilder.Entity("LearnBase.API.Models.ExerciseTag", b =>
                 {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
                     b.Property<Guid>("ExerciseId")
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("TagId")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("ExerciseId", "TagId");
+                    b.HasKey("Id");
 
                     b.HasIndex("TagId");
+
+                    b.HasIndex("ExerciseId", "TagId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_ExerciseTag_ExerciseId_TagId_Unique");
 
                     b.ToTable("ExerciseTags");
                 });
@@ -258,22 +262,26 @@ namespace LearnBase.API.Migrations
 
             modelBuilder.Entity("LearnBase.API.Models.PracticeSetExercise", b =>
                 {
-                    b.Property<Guid>("PracticeSetId")
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("ExerciseId")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
                     b.Property<int>("OrderIndex")
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("PracticeSetId", "ExerciseId");
+                    b.Property<Guid>("PracticeSetId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
 
                     b.HasIndex("ExerciseId");
+
+                    b.HasIndex("PracticeSetId", "ExerciseId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_PracticeSetExercise_SetId_ExerciseId_Unique");
 
                     b.ToTable("PracticeSetExercises");
                 });

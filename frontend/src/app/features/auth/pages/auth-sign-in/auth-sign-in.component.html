@@ -1,0 +1,73 @@
+<section class="page-shell">
+  <div class="page-header">
+    <div>
+      <p class="eyebrow">Authentication</p>
+      <h1>Log in</h1>
+    </div>
+
+    <a mat-stroked-button routerLink="/lessons">
+      <mat-icon>arrow_back</mat-icon>
+      Back
+    </a>
+  </div>
+
+  @if (loading) {
+    <div class="loading-state">
+      <mat-spinner diameter="36"></mat-spinner>
+    </div>
+  } @else {
+    <!-- <form class="form-layout" [formGroup]="form" (ngSubmit)="submit()"> -->
+    <form class="form-layout" [formGroup]="form" (ngSubmit)="submit()">
+      <mat-card>
+        <mat-card-content class="form-card">
+
+          <!-- Email -->
+          <mat-form-field appearance="outline">
+            <mat-label>Email</mat-label>
+            <input matInput formControlName="email" />
+            <mat-error>{{emailErrorMessage()}}</mat-error>
+          </mat-form-field><br/>
+
+          <!-- Password -->
+          <mat-form-field appearance="outline">
+            <mat-label>Password</mat-label>
+            <input matInput [type]="hide() ? 'password' : 'text'" formControlName="password" />
+            <mat-error>Password is required.</mat-error>
+            <button type="button"
+              matIconButton
+              matSuffix
+              (click)="clickEvent($event)"
+              [attr.aria-label]="'Hide password'"
+              [attr.aria-pressed]="hide()"
+            >
+            <mat-icon>{{hide() ? 'visibility_off' : 'visibility'}}</mat-icon>
+            </button>
+          </mat-form-field>
+          @if (postErrorMessage())
+          {
+            <mat-error>{{postErrorMessage()}}</mat-error>
+          }
+
+        </mat-card-content>
+        <mat-card-actions>
+          <br/>
+          <button class="login-button" mat-flat-button color="primary" type="submit" [disabled]="loading">
+            @if (loading) {
+              <mat-spinner diameter="18"></mat-spinner>
+            } @else {
+              <mat-icon>login</mat-icon>
+            }
+            Log in
+          </button>
+        </mat-card-actions>
+
+        <mat-card-subtitle>
+          Don't have an account?
+          <a routerLink="/register" mat-button>Sign up</a>
+        </mat-card-subtitle>
+
+
+      </mat-card>
+    </form>
+  }
+</section>

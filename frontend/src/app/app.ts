@@ -1,12 +1,29 @@
-import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { AuthTokenService } from './core/auth/auth-token.service';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, MatButtonModule, MatIconModule, MatToolbarModule],
   templateUrl: './app.html',
-  styleUrl: './app.css'
+  styleUrl: './app.css',
 })
 export class App {
-  protected readonly title = signal('learnbase-frontend');
+  readonly navLinks = [
+  { label: 'Exercises', path: '/exercises', icon: 'quiz' },
+  { label: 'Lessons', path: '/lessons', icon: 'menu_book' }, // ✅ ADD THIS
+  { label: 'Practice sets', path: '/practice-sets', icon: 'playlist_play' },
+  { label: 'Start practice', path: '/practice/start', icon: 'play_arrow' },
+  { label: 'History', path: '/practice/history', icon: 'insights' },
+];
+  readonly tokenService = new AuthTokenService();
+  readonly loggedIn = !!this.tokenService.getToken();
+
+  logout(): void {
+    this.tokenService.clearToken();
+    location.reload();
+  }
 }

@@ -1,0 +1,187 @@
+<section class="page-shell">
+  <div class="page-header">
+    <div>
+      <p class="eyebrow">Practice Sessions</p>
+      <h1>{{ session?.practiceSetTitle || 'Practice session' }}</h1>
+    </div>
+
+    <button mat-stroked-button type="button" (click)="endSession()" [disabled]="!session || ending">
+      @if (ending) {
+        <mat-spinner diameter="18"></mat-spinner>
+      } @else {
+        <mat-icon>stop_circle</mat-icon>
+      }
+      End session
+    </button>
+  </div>
+
+  @if (loading) {
+    <div class="loading-state">
+      <mat-spinner diameter="36"></mat-spinner>
+    </div>
+  } @else if (session) {
+    <div class="session-layout">
+      <mat-card>
+        <mat-card-content class="progress-card">
+          <div class="progress-meta">
+            <span>{{ completedCount() }} / {{ session.totalExercises }}</span>
+            <span>{{ progressValue() }}%</span>
+          </div>
+          <mat-progress-bar mode="determinate" [value]="progressValue()"></mat-progress-bar>
+
+          <div class="mini-stats">
+            <span class="correct">{{ correctCount() }} correct</span>
+            <span class="incorrect">{{ incorrectCount() }} incorrect</span>
+            <span>{{ skippedCount() }} skipped</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      @if (currentResult(); as result) {
+        <mat-card>
+          <mat-card-content class="question-card">
+            <div class="question-topline">
+              <span>Question {{ currentIndex + 1 }}</span>
+              @if (isComplete(result)) {
+                <span class="status-chip">{{ resultStatusLabel(result) }}</span>
+              }
+            </div>
+
+            <h2>{{ result.question }}</h2>
+
+            @if (currentExerciseType() === ExerciseType.MCQ) {
+              <mat-radio-group [formControl]="selectedOptionControl" class="answer-list">
+                @for (option of currentOptions(); track option.optionId) {
+                  <mat-radio-button [value]="option.content">{{ option.content }}</mat-radio-button>
+                }
+              </mat-radio-group>
+            } @else if (currentExerciseType() === ExerciseType.Flashcard) {
+              <div class="flashcard-actions">
+                @if (!isComplete(result)) {
+                  <button mat-stroked-button type="button" (click)="showFlashcardAnswer = true">
+                    <mat-icon>visibility</mat-icon>
+                    Show answer
+                  </button>
+
+                  @if (showFlashcardAnswer) {
+                    <div class="answer-reveal">{{ result.correctAnswer }}</div>
+                    <div class="button-row">
+                      <button
+                        mat-flat-button
+                        color="primary"
+                        type="button"
+                        (click)="submitFlashcard(true)"
+                        [disabled]="submitting"
+                      >
+                        I knew it
+                      </button>
+                      <button
+                        mat-stroked-button
+                        color="warn"
+                        type="button"
+                        (click)="submitFlashcard(false)"
+                        [disabled]="submitting"
+                      >
+                        Missed
+                      </button>
+                    </div>
+                  }
+                } @else {
+                  <div class="answer-reveal">{{ result.correctAnswer }}</div>
+                }
+              </div>
+            } @else {
+              @if (!isComplete(result)) {
+                <mat-form-field appearance="outline">
+                  <mat-label>Answer</mat-label>
+                  <textarea matInput rows="4" [formControl]="answerControl"></textarea>
+                  <mat-error>Answer is required.</mat-error>
+                </mat-form-field>
+              }
+            }
+
+            @if (isComplete(result)) {
+              <mat-divider></mat-divider>
+              <div class="result-feedback">
+                <span>Your answer: {{ result.userAnswer || 'Skipped' }}</span>
+                <span>Correct answer: {{ result.correctAnswer }}</span>
+              </div>
+            }
+          </mat-card-content>
+
+          <mat-card-actions align="end">
+            <button
+              mat-button
+              type="button"
+              (click)="goToPrevious()"
+              [disabled]="currentIndex === 0"
+            >
+              Previous
+            </button>
+            <button
+              mat-button
+              type="button"
+              (click)="goToNext()"
+              [disabled]="currentIndex >= session.results.length - 1"
+            >
+              Next
+            </button>
+            <button
+              mat-stroked-button
+              type="button"
+              (click)="skipCurrent()"
+              [disabled]="skipping || submitting || isComplete(result)"
+            >
+              @if (skipping) {
+                <mat-spinner diameter="18"></mat-spinner>
+              } @else {
+                <mat-icon>skip_next</mat-icon>
+              }
+              Skip
+            </button>
+            @if (currentExerciseType() !== ExerciseType.Flashcard) {
+              <button
+                mat-flat-button
+                color="primary"
+                type="button"
+                (click)="submitAnswer()"
+                [disabled]="submitting || skipping || isComplete(result)"
+              >
+                @if (submitting) {
+                  <mat-spinner diameter="18"></mat-spinner>
+                } @else {
+                  <mat-icon>check</mat-icon>
+                }
+                Submit
+              </button>
+            }
+          </mat-card-actions>
+        </mat-card>
+      } @else {
+        <div class="empty-state">
+          <mat-icon>task_alt</mat-icon>
+          <h2>Session complete</h2>
+          <button
+            mat-flat-button
+            color="primary"
+            type="button"
+            (click)="endSession(false)"
+            [disabled]="ending"
+          >
+            @if (ending) {
+              <mat-spinner diameter="18"></mat-spinner>
+            } @else {
+              View results
+            }
+          </button>
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="empty-state">
+      <mat-icon>error</mat-icon>
+      <h2>Session not found</h2>
+      <a mat-flat-button color="primary" routerLink="/practice/start">Start practice</a>
+    </div>
+  }
+</section>

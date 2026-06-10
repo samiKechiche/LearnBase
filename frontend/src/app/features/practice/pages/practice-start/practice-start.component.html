@@ -1,0 +1,75 @@
+<section class="page-shell narrow-page">
+  <div class="page-header">
+    <div>
+      <p class="eyebrow">Practice Sessions</p>
+      <h1>Start practice</h1>
+    </div>
+
+    <a mat-stroked-button routerLink="/practice-sets">
+      <mat-icon>playlist_play</mat-icon>
+      Practice sets
+    </a>
+  </div>
+
+  @if (loading) {
+    <div class="loading-state">
+      <mat-spinner diameter="36"></mat-spinner>
+    </div>
+  } @else if (practiceSets.length === 0) {
+    <div class="empty-state">
+      <mat-icon>playlist_add</mat-icon>
+      <h2>No practice sets yet</h2>
+      <a mat-flat-button color="primary" routerLink="/practice-sets">Create set</a>
+    </div>
+  } @else if (!hasReadyPracticeSets()) {
+    <div class="empty-state">
+      <mat-icon>playlist_add_check</mat-icon>
+      <h2>Add exercises before practicing</h2>
+      <a mat-flat-button color="primary" routerLink="/practice-sets">Manage sets</a>
+    </div>
+  } @else {
+    <mat-card>
+      <mat-card-content>
+        <form class="start-form" [formGroup]="form" (ngSubmit)="startSession()">
+          <mat-form-field appearance="outline">
+            <mat-label>Practice set</mat-label>
+            <mat-select formControlName="practiceSetId">
+              @for (practiceSet of practiceSets; track practiceSet.practiceSetId) {
+                <mat-option
+                  [value]="practiceSet.practiceSetId"
+                  [disabled]="practiceSet.exerciseCount === 0"
+                >
+                  {{ practiceSet.title }} ({{ practiceSet.exerciseCount }})
+                </mat-option>
+              }
+            </mat-select>
+            <mat-error>Select a practice set.</mat-error>
+          </mat-form-field>
+
+          <mat-radio-group formControlName="practiceOrder" class="order-options">
+            <mat-radio-button [value]="PracticeOrder.Default">Default order</mat-radio-button>
+            <mat-radio-button [value]="PracticeOrder.Randomized">Randomized</mat-radio-button>
+          </mat-radio-group>
+
+          @if (selectedSet(); as practiceSet) {
+            <div class="selected-set">
+              <strong>{{ practiceSet.title }}</strong>
+              <span>{{ practiceSet.exerciseCount }} exercises</span>
+            </div>
+          }
+
+          <div class="form-actions">
+            <button mat-flat-button color="primary" type="submit" [disabled]="starting">
+              @if (starting) {
+                <mat-spinner diameter="18"></mat-spinner>
+              } @else {
+                <mat-icon>play_arrow</mat-icon>
+              }
+              Start session
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  }
+</section>

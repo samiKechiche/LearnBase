@@ -1,0 +1,125 @@
+<section class="page-shell">
+  <div class="page-header">
+    <div>
+      <p class="eyebrow">Exercise Management</p>
+      <h1>{{ isEditMode ? 'Edit exercise' : 'New exercise' }}</h1>
+    </div>
+
+    <a mat-stroked-button routerLink="/exercises">
+      <mat-icon>arrow_back</mat-icon>
+      Back
+    </a>
+  </div>
+
+  @if (loading) {
+    <div class="loading-state">
+      <mat-spinner diameter="36"></mat-spinner>
+    </div>
+  } @else {
+    <form class="form-layout" [formGroup]="form" (ngSubmit)="save()">
+      <mat-card>
+        <mat-card-content class="form-card">
+          <mat-form-field appearance="outline">
+            <mat-label>Exercise type</mat-label>
+            <mat-select formControlName="type">
+              @for (type of typeOptions; track type.value) {
+                <mat-option [value]="type.value">{{ type.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Question</mat-label>
+            <textarea matInput rows="4" formControlName="question"></textarea>
+            <mat-error>Question is required.</mat-error>
+          </mat-form-field>
+
+          @if (isMcq) {
+            <div class="option-panel">
+              <div class="section-heading">
+                <h2>Options</h2>
+                <button
+                  mat-stroked-button
+                  type="button"
+                  (click)="addOption()"
+                  [disabled]="options.length >= 5"
+                >
+                  <mat-icon>add</mat-icon>
+                  Add option
+                </button>
+              </div>
+
+              <mat-radio-group formControlName="correctOptionIndex" class="options-list">
+                <ng-container formArrayName="options">
+                  @for (option of options.controls; track i; let i = $index) {
+                    <div class="option-row" [formGroupName]="i">
+                      <mat-radio-button
+                        [value]="option.get('orderIndex')?.value"
+                      ></mat-radio-button>
+                      <mat-form-field appearance="outline">
+                        <mat-label>Option {{ i + 1 }}</mat-label>
+                        <input matInput formControlName="content" />
+                        <mat-error>Option text is required.</mat-error>
+                      </mat-form-field>
+                      <button
+                        mat-icon-button
+                        color="warn"
+                        type="button"
+                        (click)="removeOption(i)"
+                        [disabled]="options.length <= 2"
+                      >
+                        <mat-icon>remove_circle</mat-icon>
+                      </button>
+                    </div>
+                  }
+                </ng-container>
+              </mat-radio-group>
+            </div>
+          } @else {
+            <mat-form-field appearance="outline">
+              <mat-label>Answer</mat-label>
+              <textarea matInput rows="4" formControlName="answer"></textarea>
+              <mat-error>Answer is required.</mat-error>
+            </mat-form-field>
+          }
+
+          <mat-divider></mat-divider>
+
+          <div class="tag-area">
+            <mat-form-field appearance="outline">
+              <mat-label>Tags</mat-label>
+              <mat-select formControlName="tagIds" multiple>
+                @for (tag of tags; track tag.tagId) {
+                  <mat-option [value]="tag.tagId">{{ tag.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+
+            <div class="new-tag-row">
+              <mat-form-field appearance="outline">
+                <mat-label>New tag</mat-label>
+                <input matInput [formControl]="newTagControl" />
+              </mat-form-field>
+              <button mat-stroked-button type="button" (click)="createTag()">
+                <mat-icon>sell</mat-icon>
+                Add tag
+              </button>
+            </div>
+          </div>
+        </mat-card-content>
+
+        <mat-card-actions align="end">
+          <a mat-button routerLink="/exercises">Cancel</a>
+          <button mat-flat-button color="primary" type="submit" [disabled]="saving">
+            @if (saving) {
+              <mat-spinner diameter="18"></mat-spinner>
+            } @else {
+              <mat-icon>save</mat-icon>
+            }
+            Save
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </form>
+  }
+</section>

@@ -1,0 +1,18 @@
+.start-form,
+.order-options {
+  display: grid;
+  gap: 18px;
+}
+
+.selected-set {
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  padding: 14px 16px;
+}
+
+.selected-set span {
+  color: #6b7280;
+}
